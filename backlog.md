@@ -24,12 +24,12 @@ global.
 
 ---
 
-## 🟡 2 · Skill del portal (scraper)
+## ✅ 2 · Skill del portal (scraper)
 
-**Estado:** código escrito y probado contra una página real del portal
-(guardada a mano por el usuario, ya que este entorno no tiene salida a
-`portalinmobiliario.com`). **Falta correrlo con red real** para generar el
-snapshot completo de la zona — recién ahí cierra este ítem.
+**Estado:** cerrado. Corrida real en la máquina de la usuaria (este entorno
+y el "Cowork" de escritorio tienen egreso de red bloqueado hacia el portal,
+así que se ejecutó desde su Terminal con Python directo, sin necesitar
+Claude Code local).
 
 Skill: `inversion-inmobiliaria` (`.claude/skills/inversion-inmobiliaria/`).
 Lee la URL de Portal Inmobiliario guardada en `specs.md`, arma la URL de
@@ -37,23 +37,19 @@ cada página (gramática decodificada a mano: segmento `_Desde_<N>` para
 paginar, 100 resultados por página), parsea cada card
 (`li.ui-search-layout__item`) y guarda snapshot crudo antes de filtrar.
 
-**Parámetros ya acordados (no volver a preguntar):** tope 150 propiedades,
-timeout 10 minutos, corte por lo primero que ocurra entre página incompleta
-/ tope / timeout, motivo de corte escrito en el archivo de salida.
+**Resultado de la corrida:** motivo de corte = tope de 150 propiedades
+alcanzado; 2 páginas leídas; 150 propiedades; 0 duplicados. Snapshot en
+`data/scraper/snapshot.json` (no versionado — está en `.gitignore` por ser
+output de una corrida, no código fuente).
 
-**Nombre del skill:** `inversion-inmobiliaria` (definido por el usuario).
-
-**Pendiente:**
-- Correr el scraper con internet real (este entorno y el "Cowork" del
-  usuario tienen egreso de red bloqueado hacia el portal) y confirmar que
-  el snapshot completo sale bien.
+**Pendiente para el paso 3 (no bloquea el cierre de este ítem):**
 - Decidir dónde aplicar el filtro de "solo propiedades nuevas" — el portal
   tiene un filtro de antigüedad (`PROPERTY*AGE_0años-0años`) pero no se
-  confirmó su forma ya aplicada; por ahora el scraper no lo aplica en la
-  URL.
+  confirmó su forma ya aplicada; por ahora el snapshot trae todo lo que cae
+  en la zona y el precio de la URL dada, sin ese filtro aplicado.
 
 **Éxito:** snapshot generado, motivo de corte declarado, sin propiedades
-repetidas ni sin identificador.
+repetidas ni sin identificador. ✅
 
 ---
 
