@@ -24,20 +24,33 @@ global.
 
 ---
 
-## ⬜ 2 · Skill del portal (scraper)
+## 🟡 2 · Skill del portal (scraper)
 
-Crear un skill que lea la URL de Portal Inmobiliario ya guardada en
-`specs.md`, decodifique en vivo la gramática actual del sitio (armado de URL
-de listado, paginación, selectores de card, campos disponibles) y traiga las
-propiedades publicadas en esa zona.
+**Estado:** código escrito y probado contra una página real del portal
+(guardada a mano por el usuario, ya que este entorno no tiene salida a
+`portalinmobiliario.com`). **Falta correrlo con red real** para generar el
+snapshot completo de la zona — recién ahí cierra este ítem.
+
+Skill: `inversion-inmobiliaria` (`.claude/skills/inversion-inmobiliaria/`).
+Lee la URL de Portal Inmobiliario guardada en `specs.md`, arma la URL de
+cada página (gramática decodificada a mano: segmento `_Desde_<N>` para
+paginar, 100 resultados por página), parsea cada card
+(`li.ui-search-layout__item`) y guarda snapshot crudo antes de filtrar.
 
 **Parámetros ya acordados (no volver a preguntar):** tope 150 propiedades,
 timeout 10 minutos, corte por lo primero que ocurra entre página incompleta
-/ tope / timeout, motivo de corte escrito en el archivo de salida, guardar
-snapshot crudo antes de filtrar.
+/ tope / timeout, motivo de corte escrito en el archivo de salida.
 
-**Pendiente de definir con el usuario al abrir este ítem:** nombre del
-skill y que quede dentro del proyecto.
+**Nombre del skill:** `inversion-inmobiliaria` (definido por el usuario).
+
+**Pendiente:**
+- Correr el scraper con internet real (este entorno y el "Cowork" del
+  usuario tienen egreso de red bloqueado hacia el portal) y confirmar que
+  el snapshot completo sale bien.
+- Decidir dónde aplicar el filtro de "solo propiedades nuevas" — el portal
+  tiene un filtro de antigüedad (`PROPERTY*AGE_0años-0años`) pero no se
+  confirmó su forma ya aplicada; por ahora el scraper no lo aplica en la
+  URL.
 
 **Éxito:** snapshot generado, motivo de corte declarado, sin propiedades
 repetidas ni sin identificador.
