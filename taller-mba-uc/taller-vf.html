@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta charset="utf-8"><meta charset="utf-8"><meta charset="utf-8"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Taller MBA UC · sistema de agentes</title>
+<style>
+:root{--ink:#002244;--navy:#0D1634;--indigo:#172469;--accent:#FF0066;
+  --border:#DADFE8;--surface:#F0F1F5;--muted:#5A6B80;
+  --sans:Roboto,"Helvetica Neue",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);color:var(--ink);background:#fff;font-size:16px;line-height:1.6}
+code{font-family:var(--mono);font-size:.86em;background:var(--surface);padding:1px 5px;border-radius:4px}
+.top{position:fixed;top:0;left:0;right:0;height:59px;z-index:50;display:flex;align-items:center;
+  justify-content:space-between;padding:0 22px;color:#fff;font-size:13px;
+  background:linear-gradient(90deg,#0D1634 0%,#172469 55%,#FF0066 130%)}
+.top .av{font-family:var(--mono);font-size:12px;opacity:.9}
+.side{position:fixed;top:59px;left:0;bottom:0;width:260px;z-index:40;padding:26px 0 20px;
+  background:linear-gradient(180deg,#172469 0%,#0D1634 100%);overflow-y:auto}
+.side h1{font-size:19px;font-weight:900;color:var(--accent);padding:0 22px;line-height:1.25}
+.side h1 span{color:#fff;display:block}
+.side .meta{padding:10px 22px 0;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.side nav{margin-top:24px;display:flex;flex-direction:column}
+.side nav a{padding:9px 22px;color:rgba(255,255,255,.85);text-decoration:none;font-size:15px;
+  border-left:2px solid transparent}
+.side nav a:hover{color:#fff}
+.side nav a.on{color:#fff;border-left-color:var(--accent);background:rgba(255,255,255,.05)}
+main{margin-left:260px;padding:59px 40px 90px;max-width:1080px}
+section.blk{padding-top:52px;scroll-margin-top:75px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+h2{font-size:26px;font-weight:900;margin:8px 0 14px}
+p.sub{color:var(--muted);max-width:70ch}
+.pills{display:flex;flex-wrap:wrap;gap:9px;margin:22px 0 6px}
+.pill{display:flex;align-items:center;gap:7px;border:1px solid var(--border);border-radius:99px;
+  padding:7px 15px;font-size:14px;font-weight:700;color:var(--ink);text-decoration:none}
+.pill b{width:19px;height:19px;border-radius:50%;background:var(--surface);color:var(--muted);
+  font-size:11px;display:grid;place-items:center}
+.pill:hover{border-color:var(--accent)}
+.paso{border:1px solid var(--border);border-radius:10px;margin-top:11px;background:#fff;
+  scroll-margin-top:75px;overflow:hidden}
+.paso.abierta{border-color:var(--accent)}
+.paso.abierta .cuerpo-in{border-left:3px solid var(--accent)}
+.cab{width:100%;display:flex;gap:15px;align-items:flex-start;text-align:left;cursor:pointer;
+  background:none;border:0;padding:16px 20px;font-family:inherit}
+.num{flex:0 0 34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;
+  font-weight:700;font-size:15px;display:grid;place-items:center}
+.tt{flex:1}
+.eb{display:block;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.ti{display:block;font-size:16px;font-weight:700;color:var(--ink);margin-top:2px}
+.ap{display:block;font-size:13.5px;color:var(--muted);margin-top:3px}
+.chev{color:var(--accent);font-size:20px;transition:transform .2s;line-height:1}
+.paso.abierta .chev{transform:rotate(180deg)}
+.cuerpo{display:grid;grid-template-rows:0fr;transition:grid-template-rows .22s ease}
+.paso.abierta .cuerpo{grid-template-rows:1fr}
+.cuerpo-in{overflow:hidden;padding:0 20px}
+.paso.abierta .cuerpo-in{padding:0 20px 20px 17px}
+.cuerpo ul{margin:4px 0 0 18px}
+.cuerpo li{margin-bottom:9px;line-height:1.62}
+.cuerpo li::marker{color:var(--accent)}
+.pbox{margin-top:16px;border-radius:8px;overflow:hidden;background:var(--navy)}
+.pbar{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;
+  background:rgba(255,255,255,.05)}
+.pbar span{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.cop{background:rgba(255,255,255,.14);border:0;color:#fff;font-size:11px;font-weight:700;
+  border-radius:5px;padding:4px 10px;cursor:pointer;font-family:var(--sans)}
+.cop.ok{background:var(--accent)}
+.pbox pre{margin:0;padding:14px 16px;color:#E8EDF5;font-family:var(--mono);font-size:13px;
+  line-height:1.55;white-space:pre-wrap;overflow-x:auto}
+.hecho{display:inline-flex;align-items:center;gap:8px;margin-top:14px;font-size:14px;
+  color:var(--muted);cursor:pointer}
+.hecho input{accent-color:var(--accent);width:16px;height:16px}
+.nota{background:var(--surface);border-left:3px solid var(--accent);border-radius:6px;
+  padding:12px 14px;margin-top:16px;font-size:14.5px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.card{border:1px solid var(--border);border-radius:10px;padding:18px 16px}
+.card .l{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.card h3{font-size:15px;margin:6px 0 6px}
+.card p{font-size:14px;color:var(--muted)}
+ul.simple{margin-left:18px} ul.simple li{margin-bottom:9px} ul.simple li::marker{color:var(--accent)}
+footer{margin-left:260px;border-top:1px solid var(--border);padding:26px 40px;
+  text-align:center;font-size:12px;color:var(--muted)}
+@media(max-width:1024px){
+  .side{transform:translateX(-100%);transition:transform .2s} .side.open{transform:none}
+  main,footer{margin-left:0;padding-left:20px;padding-right:20px}
+  .cards{grid-template-columns:1fr}
+}
+
+.tabla{overflow-x:auto;margin-top:10px}
+.tabla table{border-collapse:collapse;width:100%;font-size:13.5px}
+.tabla th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--accent);padding:7px 10px;border-bottom:1px solid var(--border)}
+.tabla td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--ink)}
+.tabla td:first-child{color:var(--muted);white-space:nowrap}
+.tabla code{white-space:normal;word-break:break-all;line-height:1.7}
+.tabla td:not(:first-child){font-size:12.5px}
+
+</style></head><body>
+
+<div class="top">
+  <b>Taller MBA UC · sistema de agentes</b>
+  <span class="av">avance <b id="av">0</b>/7</span>
+</div>
+
+<aside class="side">
+  <h1>Taller MBA UC<span>Sistema de agentes</span></h1>
+  <div class="meta">4 horas · un caso, construido por vos</div>
+  <nav id="nav">
+    <a href="#inicio" data-anchor="inicio" class="">Overview</a>
+    <a href="#antes" data-anchor="antes" class="">Antes de empezar</a>
+    <a href="#repositorio" data-anchor="repositorio" class="">Repositorio</a>
+    <a href="#p1" data-anchor="p1" class="">1 · Definir</a><a href="#p2" data-anchor="p2" class="">2 · Skill del portal</a><a href="#p3" data-anchor="p3" class="">3 · Notion</a><a href="#p4" data-anchor="p4" class="">4 · Priorizar</a><a href="#p5" data-anchor="p5" class="">5 · Evaluador</a><a href="#p6" data-anchor="p6" class="">6 · Contactar</a><a href="#p7" data-anchor="p7" class="">7 · Supervisar</a>
+    <a href="#problemas" data-anchor="problemas" class="on">Cuando algo falla</a>
+  </nav>
+</aside>
+
+<main>
+  <section class="blk" id="inicio">
+    <div class="eyebrow">Trabajo práctico</div>
+    <h2>Construir un agente que identifique oportunidades de inversión para Airbnb en Santiago</h2>
+    <p class="sub">El objetivo es que puedas desarrollar una corrida hecha con vibe-coding que busca propiedades de tu preferencia, extrae, las evalúa, presenta un modelo financiero, se pone en contacto con la corredora y te agenda en tu calendario la visita.</p>
+    <div class="pills"><a class="pill" href="#p1"><b>1</b>Definir</a><a class="pill" href="#p2"><b>2</b>Skill del portal</a><a class="pill" href="#p3"><b>3</b>Notion</a><a class="pill" href="#p4"><b>4</b>Priorizar</a><a class="pill" href="#p5"><b>5</b>Evaluador</a><a class="pill" href="#p6"><b>6</b>Contactar</a><a class="pill" href="#p7"><b>7</b>Supervisar</a></div>
+    <div class="nota">Se entregan algunos datos y archivos guía menores para poder avanzar a una versión funcional en 4 horas.&nbsp;</div>
+  </section>
+
+  <section class="blk" id="antes">
+    <div class="eyebrow">Set-up</div>
+    <h2>Tenés que llegar con esto instalado y probado</h2>
+    <ul class="simple">
+      <li>Cuenta <b>Claude Pro o Max</b> — o <b>ChatGPT Plus</b> si vas a usar Codex CLI</li>
+      <li><b>Python 3.10 o superior</b> — se descarga de <a href="https://python.org">python.org</a>.
+          Verificá que responda en el terminal: en Mac <code>python3 --version</code>,
+          en Windows <code>python --version</code>. En Windows <code>python3</code> te abre la
+          Microsoft Store en vez de contestar, aunque Python esté bien instalado.</li>
+      <li><b>Git</b> — se descarga de <a href="https://git-scm.com">git-scm.com</a>.
+          Verificá que <code>git --version</code> responda en el terminal</li>
+      <li>Cuentas de <b>Notion</b>, <b>Gmail</b>, <b>Google Calendar</b> y <b>GitHub</b>
+          — las tres primeras conectadas al LLM en sección "conectores"</li>
+      <li><b>8 GB de RAM</b> como mínimo, 16 GB para trabajar cómodo</li>
+      <li><b>3 GB libres</b> de disco</li>
+      <li><b>Playwright con Chromium</b> — se instala desde tu terminal (pesa unos 550 MB)</li>
+    </ul>
+  </section>
+
+  <section class="blk" id="repositorio">
+    <div class="eyebrow">Repositorio</div>
+    <h2>Accedé al repositorio desde tu terminal</h2>
+    <p class="sub">Todo lo que necesitás está en un repositorio público. <b>No lo bajes a mano. Pedile a tu LLM</b></p>
+
+    <ul class="simple" style="margin-top:16px">
+      <li><b>Creá una carpeta vacía</b> donde quieras trabajar.
+        En Mac desde Finder, en Windows desde el Explorador.</li>
+      <li><b>Abrí Claude Code</b>&nbsp;y apuntalo a esa carpeta.
+        Todo el proyecto va a vivir ahí.</li>
+      <li><b>Pegá este prompt</b> y aprobá los comandos que te proponga.
+        Claude elige el comando correcto para tu sistema operativo.</li>
+    </ul>
+
+    <div class="pbox">
+      <div class="pbar"><span>prompt para copiar y pegar en claude</span>
+        <button class="cop" onclick="copiar(this)">COPIAR</button></div>
+      <pre>Clona el repositorio del taller dentro de esta carpeta e instala la
+skill que trae:
+
+  https://github.com/bnavoni/taller-mba-uc
+
+Al clonar queda una carpeta taller-mba-uc adentro. Copia
+taller-mba-uc/skills/entrevistador-de-diseno a .claude/skills/ de este
+proyecto, usando el comando que corresponda a mi sistema operativo.
+
+Cuando termines, mostrame que archivos quedaron y confirmame que la skill
+quedo disponible. No hagas nada más que lo solicitado hasta que de nuevas instrucciones.</pre>
+    </div>
+
+    <div class="nota">Claude Code te pide
+    permiso antes de tocar archivos o correr algo en tu terminal. Podés configurar esos permisos en tu cuenta.</div>
+
+    <p style="margin-top:22px;font-size:14.5px;color:var(--muted)">
+      Lo que Claude va a correr por debajo, por si querés verlo:</p>
+    <div class="tabla">
+      <table>
+        <tbody><tr><th></th><th>Mac</th><th>Windows (PowerShell)</th></tr>
+        <tr><td>Bajar el repo</td>
+            <td colspan="2" style="text-align:center"><code>git clone https://github.com/bnavoni/taller-mba-uc.git</code> — igual en los dos</td></tr>
+        <tr><td>Crear la carpeta de skills</td>
+            <td><code>mkdir -p .claude/skills</code></td>
+            <td><code>New-Item -ItemType Directory -Force .claude\skills</code></td></tr>
+        <tr><td>Copiar la skill</td>
+            <td><code>cp -R taller-mba-uc/skills/entrevistador-de-diseno .claude/skills/</code></td>
+            <td><code>Copy-Item -Recurse taller-mba-uc\skills\entrevistador-de-diseno .claude\skills\</code></td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="nota" style="margin-top:16px"><b>Ojo con la ruta.</b> <code>git clone</code> crea la
+    carpeta <code>taller-mba-uc</code> adentro de la que definiste como trabajo, así que la skill queda ahí dentro y no en
+    la raíz.</div>
+
+    <p style="margin-top:26px;font-size:14.5px;color:var(--muted)"><b>Qué hay en el repositorio:</b></p>
+<div class="cards">
+      <div class="card"><div class="l">marco de agentes</div>
+        <h3>Guía de diseño</h3>
+        <p>Framework con las condiciones a cumplir (ej.: specs, contexto, harness, etc). Con una plantilla para completar por cada agente
+        y un ejemplo de cómo se ve completada.&nbsp;</p></div>
+      <div class="card"><div class="l">supuestos.yaml</div>
+        <h3>Datos con supuestos operativos</h3>
+        <p>Tarifa y ocupación por tipología con estacionalidad de 12 meses, gastos comunes,
+        equipamiento con vida útil y parámetros del crédito. Son valores fijos para agilizar el modelo financiero.</p></div>
+    </div>
+  </section>
+
+  <section class="blk" id="pasos">
+    <div class="eyebrow">ejercicio</div>
+    <h2>Propuesta de pasos a seguir</h2>
+    <p class="sub">Idealmente seguí tu propio camino, y podés usar esta sección como guía&nbsp;</p>
+    
+<section class="paso abierta" id="p1">
+  <button class="cab" onclick="toggle(this)" aria-expanded="false">
+    <span class="num">1</span>
+    <span class="tt">
+      <span class="eb">specs</span>
+      <span class="ti">El diseño general</span>
+      <span class="ap">En este paso vas a diseñar la solución general y dejar un archivo .md con las especificaciones del diseño · <b>30 min</b></span>
+    </span>
+    <span class="chev">⌄</span>
+  </button>
+  <div class="cuerpo"><div class="cuerpo-in">
+    <ul><li>Trabajá en la carpeta que elegiste en el paso anterior.</li><li>Conectate via MCP con el repositorio, o descarga y lee&nbsp;<code>marco-de-agentes.md</code>&nbsp;para guiarte con la plantilla del agente</li><li>Andá a portalinmobiliario, dibujá tu zona en el mapa y guardá la URL. <strong>Hacela chica</strong>: la densidad de Las Condes es de ~528 propiedades por km², así que un radio de 1 km son más de 1.500 avisos.</li></ul>
+    <div class="pbox">
+      <div class="pbar"><span>prompt para copiar y pegar en claude</span>
+        <button class="cop" onclick="copiar(this)">COPIAR</button></div>
+      <pre>Quiero construir un agente que busque departamentos de inversión para
+operar como Airbnb, los evalue financieramente, así los puedo elegir. Luego que me prepare un borrador de contacto con la corredora y me agende un espacio en mi calendario, para las propiedades aprobadas por mi que quiero visitar.
+
+Antes de escribir codigo quiero que me entrevistes para dejar el diseño general por escrito. Entrevistame con
+preguntas -una por vez, máximo 10, con tu recomendacion en cada una - sobre mis preferencias, objetivos, finalidad, restricciones, limitaciones, consideraciones, parametros de diseño, entre otros, hasta que quede definido:
+
+1. los objetivos, preferencias, elementos del sistema, secuencia y donde empieza y termina el trabajo de cada tarea
+2. que informacion necesita cada uno para arrancar sin contexto previo, y de donde sale
+3. que constituye el éxito del proceso unitario y global
+4. en que momentos decide el usuario el avance
+5. diseño para escalabilidad y correr con programación
+
+El plan del diseño general, lo quiero en un backlog.md donde estén los items paso a paso de lo que vamos a hacer. Si te doy un prompt en el futuro que está alineado con algun backlog item, avisame así abrimos el item y avanzamos. Fundamental tener un backlog estructurado para nuestro proceso. 
+
+Los hechos que puedas averiguar solo (que hay en el filesystem) averigualos. Las decisiones finales son mias. 
+
+Si te compartí antes una URL de PortalInmobiliario, guardala pero no la analices en este paso. Solamente diseño ahora. Si no te la di, pedimela.
+
+Cuando lleguemos a acuerdo, escribi CLAUDE.md con las reglas y specs.md con los detalles acordados. No escribas nada mas ni propongas próximos pasos hasta que yo confirme.</pre>
+    </div>
+    <label class="hecho"><input type="checkbox" data-paso="1" onchange="marcar()"> Terminé este paso</label>
+  </div></div>
+</section>
+<section class="paso" id="p2">
+  <button class="cab" onclick="toggle(this)" aria-expanded="true">
+    <span class="num">2</span>
+    <span class="tt">
+      <span class="eb">web scraper&nbsp;</span>
+      <span class="ti">Skill para leer Portal Inmobiliario</span>
+      <span class="ap">Vas a generar un instructivo extraer datos de un sitio que se defiende de los bots, y cortar por una regla verificable · <b>30 min</b></span>
+    </span>
+    <span class="chev">⌄</span>
+  </button>
+  <div class="cuerpo"><div class="cuerpo-in">
+    <ul><li>El portal responde 302 a cualquier cliente que no ejecute JavaScript.&nbsp;Un navegador headless pasa sin cuenta y sin cookies.</li><li>Definí las tres reglas de corte antes de correr nada: por cantidad, por tiempo, y por página incompleta.</li><li>Guardá el resultado crudo en un archivo antes de tocarlo. Si el parseo tiene un bug, no querés volver a scrapear para arreglarlo.</li></ul>
+    <div class="pbox">
+      <div class="pbar"><span>prompt para copiar y pegar en claude</span>
+        <button class="cop" onclick="copiar(this)">COPIAR</button></div>
+      <pre>Salvo que hayamos acordado un paso previo, quiero crear un skill que sepa leer un link que voy a compartir de portalinmobiliario.com y traer las propiedades publicadas en dicha zona.
+
+La zona la defino yo pegando la URL del mapa. De esa URL sale un bounding box.
+
+Antes de escribir el skill, entra al portal y decodifica la gramatica de hoy:
+como se arma la URL de listado, como se pagina, que selector tiene cada card,
+y que campos trae. No asumas nada: verificalo abriendo la pagina.
+
+El skill tiene que cortar por lo primero que ocurra entre: una pagina con
+menos resultados que el maximo (es la ultima), un tope de propiedades que yo
+defino, o un timeout en minutos que yo defina (preguntame). todos parámetros que deben ser definidos para la creación de esta skill. El motivo de corte se escribe en el archivo de salida.
+
+Guarda un snapshot crudo antes de filtrar nada. El objetivo de la skill es aprender a hacer el scrap, y que puedas informarme a mí la estructura que existe para poder armar mi database. Preguntame el nombre que le vamos a dar a la skill y que quede dentro del proyecto.</pre>
+    </div>
+    <label class="hecho"><input type="checkbox" data-paso="2" onchange="marcar()"> Terminé este paso</label>
+  </div></div>
+</section>
+<section class="paso" id="p3">
+  <button class="cab" onclick="toggle(this)" aria-expanded="true">
+    <span class="num">3</span>
+    <span class="tt">
+      <span class="eb">vault</span>
+      <span class="ti">Estructurar una base en Notion</span>
+      <span class="ap">Vas a diseñar un schema de la vault en Notion donde se almacenan los datos extraídos de la web · <b>15 min</b></span>
+    </span>
+    <span class="chev">⌄</span>
+  </button>
+  <div class="cuerpo"><div class="cuerpo-in">
+    <ul><li>Este esquema se diseña <strong>después</strong> de tener el snapshot de las cards de Portal Inmobiliario, porque es mejor definir una base sabiendo qué trae el dato.</li><li>Decidí qué columnas escribe el sistema y cuáles escribís vos (ej. tag de aprobaciones), dejalas todas listas y ordenadas.</li><li>Al terminar, compara Notion contra el snapshot fila por fila. O piensa en crear un agente que haga este harness</li></ul>
+    <div class="pbox">
+      <div class="pbar"><span>prompt para copiar y pegar en claude</span>
+        <button class="cop" onclick="copiar(this)">COPIAR</button></div>
+      <pre>Ya tenemos el snapshot con las propiedades y el skill, entonces sabemos como llegará el dato. Ahora quiero estructurar una base en Notion.
+
+Primero mostrame que campos trae realmente el snapshot y propone un esquema
+sobre eso: tipo de cada columna, y cuales escribe el sistema y cuales escribo
+yo que serían adicionales. No crees nada hasta que apruebe el esquema, si es necesario me entrevistas para alinear detalles. 
+
+Despues, una vez acordada la base, con mi aprobación usa el MCP con Notion para extraer los datos de PortalInmobiliario  y cargar las propiedades a la base en Notion.
+
+Cuando termines, quiero un chequeo que no dependa de tu criterio: contá las
+filas de Notion contra las del snapshot, y compará precio y metros cuadrados
+propiedad por propiedad. Mostrame las diferencias si las hay. Y dame un resumen del resultado. Informame donde guardaste la DB y pedi confirmación mía de que la vi antes que sigamos.</pre>
+    </div>
+    <label class="hecho"><input type="checkbox" data-paso="3" onchange="marcar()"> Terminé este paso</label>
+  </div></div>
+</section>
+<section class="paso" id="p4">
+  <button class="cab" onclick="toggle(this)" aria-expanded="true">
+    <span class="num">4</span>
+    <span class="tt">
+      <span class="eb">análisis</span>
+      <span class="ti">Armar ratios y priorización</span>
+      <span class="ap">Vas a ordenar los datos según variables disponibles (ej.: UF/m2) y elegir
+      con cuáles seguís · <b>15 min</b></span>
+    </span>
+    <span class="chev">⌄</span>
+  </button>
+  <div class="cuerpo"><div class="cuerpo-in">
+    <ul><li>Vamos a calcular ratios tipo UF/m² como variable normalizada a partir de los datos extraidos y que sea comparable <strong>dentro de la misma tipología</strong>.</li><li>Puedes calcular otros valores que encuentres interesantes, o hacer brainstorming con Claude</li><li>Si un grupo tiene menos de 5 propiedades, su mediana no significa nada. Mostralo con un flag en vez de fingir precisión.</li><li><strong>Acá decidís vos por primera vez:</strong> el ranking no elige, ordena. Antes de pasar al evaluador quedate con un puñado. No vas a modelar doscientas propiedades.</li></ul>
+    <div class="pbox">
+      <div class="pbar"><span>prompt para copiar y pegar en claude</span>
+        <button class="cop" onclick="copiar(this)">COPIAR</button></div>
+      <pre>Con los datos que ya estan en Notion, quiero hacer un análisis para obtener un ranking.
+
+Reglas:
+- el calculo lo hace un script de Python. 
+- cero supuestos financieros en este paso. Solo aritmetica sobre datos
+  observados, que pueden ser UF/m2, mediana y percentil, y otros que tenemos que definir en conjunto, con mi aprobación.
+- agrupá por tipologia y ordená dentro de cada grupo. No compares un 1D1B con
+  un 2D2B.
+- si un grupo tiene menos de 5 propiedades, no reportes percentil: marcalo
+  como grupo chico.
+- nada de score compuesto con pesos
+- Proponeme otros análisis que puedan ser posibles hacer y yo decido si quiero hacerlos o no, en caso que no sea prioritario podes proponerme agregarlos al backlog
+
+Escribi el resultado de vuelta en Notion y dejá el script en el repo.</pre>
+    </div>
+    <label class="hecho"><input type="checkbox" data-paso="4" onchange="marcar()"> Terminé este paso</label>
+  </div></div>
+</section>
+<section class="paso" id="p5">
+  <button class="cab" onclick="toggle(this)" aria-expanded="true">
+    <span class="num">5</span>
+    <span class="tt">
+      <span class="eb">el modelo</span>
+      <span class="ti">El evaluador financiero</span>
+      <span class="ap">Vas a crear un front end interactivo que visibilice los supuestos y el
+      caso de negocios, y marcar en Notion cuáles visitás · <b>35 min</b></span>
+    </span>
+    <span class="chev">⌄</span>
+  </button>
+  <div class="cuerpo"><div class="cuerpo-in">
+    <ul><li>Los supuestos te los damos en <code>supuestos.yaml</code>&nbsp;y son parte de los archivos que descargaste. Contiene referencias de tarifa y ocupación por tipología con estacionalidad de 12 meses, gastos comunes, equipamiento y parámetros del crédito.</li><li>Son una referencia. Podés modificarlos como gustes.</li><li>Que el resultado muestre el punto de equilibrio, no sólo el retorno.&nbsp;</li><li><strong>Y acá decidís de nuevo, que es el punto del paso:</strong> mueve los supuestos antes de elegir.&nbsp;</li><li>Marcá tu decisión en Notion. Prepara una columna específica para aprobar 1 a 3 propiedades que quieras analizar.</li></ul>
+    <div class="pbox">
+      <div class="pbar"><span>prompt para copiar y pegar en claude</span>
+        <button class="cop" onclick="copiar(this)">COPIAR</button></div>
+      <pre>Quiero un evaluador financiero en un solo archivo HTML, para analizar las mejores propiedades que voy a ir a visitar.
+
+Carga los supuestos desde supuestos.yaml: tarifa y ocupacion por tipologia
+(son curvas de 12 meses, no promedios), costos de operacion, equipamiento con
+vida util, y los parametros del credito.
+
+Requisitos:
+- los supuestos tienen que ser visibles y editables en pantalla
+- que muestre retorno Y punto de equilibrio en gráficos visuales según el tiempo
+- que muestre un análisis de sensibilidad de la cuota mensual en CLP, entre el valor incremental de la tasa y el bono pie
+- Que muestre la composición de la cuota hipotecaria
+- Que traiga el valor de la UF actualizado de la página del SII Chile
+- Que permita confirmar el acceso al crédito según mi remuneración (Clasificación de renta)
+- Que permita medir retorno contra un parámetro variable de Tasa de descuento
+- Que contenga un flujo de caja mensual para el primer año y uno anual para el plazo del crédito hipotecario definido, considerando ingresos, costos operativos, dividendo, e inversiones como muebles, electrodomésticos, entre otros
+- Que permita definir una variable de plusvalia sobre la venta  y un escenario de venta en un año "x" según el incremento porcentual de la plusvalía, recalculando ROI, VPN
+- que pueda comparar las mejores propiedades del ranking lado a lado, y que la
+  comparacion se recalcule cuando muevo un supuesto
+- un solo archivo, sin dependencias externas, que abra con doble clic
+
+Antes de escribirlo, mostrame que formulas vas a usar para la cuota, el flujo
+y el punto de equilibrio.</pre>
+    </div>
+    <label class="hecho"><input type="checkbox" data-paso="5" onchange="marcar()"> Terminé este paso</label>
+  </div></div>
+</section>
+<section class="paso" id="p6">
+  <button class="cab" onclick="toggle(this)" aria-expanded="false">
+    <span class="num">6</span>
+    <span class="tt">
+      <span class="eb">plan de acción</span>
+      <span class="ti">Contactar y agendar</span>
+      <span class="ap">Vas a preparar una acción · <b>20 min</b></span>
+    </span>
+    <span class="chev">⌄</span>
+  </button>
+  <div class="cuerpo"><div class="cuerpo-in">
+    <ul><li>Recién acá se entra a la ficha individual de cada propiedad, y sólo de las que aprobaste. Es el trabajo caro: hacelo sobre lo poco que importa.</li><li>Portal Inmobiliario publica generalmente&nbsp;<strong>teléfono, a veces mail</strong>. Tu sistema puede que manejar los dos casos, pero para este ejercicio práctico va a ser con mail idealmente.</li><li>El correo se recomienda que sea hecho como borrador y quede listo a enviar por el usuario.</li></ul>
+    <div class="pbox">
+      <div class="pbar"><span>prompt para copiar y pegar en claude</span>
+        <button class="cop" onclick="copiar(this)">COPIAR</button></div>
+      <pre>Para las propiedades que marque como aprobadas para visitar en Notion:
+
+1. entra a la ficha individual (card) de cada una y sacá corredora, telefono y mail
+   si lo hay
+2. armá un archivo con esos contactos
+3. redactá un mensaje por propiedad, listo para copiar. Si hay mail, como mail;
+   si solo hay telefono, como mensaje de WhatsApp. Usa el MCP de Gmail para dejar el borrador listo para enviar ahí y me avisas cuando esté listo. Propone en el correo 3 alternativas de horario de visita según la disponibilidad que encuentres en mi agenda de Google Calendar via MCP entre lunes a viernes de 8 a 10 y de 17 a 19hs, y sábados de 9 a 13 hs. Siempre utilizá máximo 7 días para adelante, no más.
+4. generá un bloqueo de agenda por visita, marcado como TENTATIVO usando el MCP de Google Calendar.
+
+Regla que no se negocia: no envies nada. Ni un mail, ni un mensaje, ni una
+invitacion. Todo queda como archivo para que yo revise y decida.</pre>
+    </div>
+    <label class="hecho"><input type="checkbox" data-paso="6" onchange="marcar()"> Terminé este paso</label>
+  </div></div>
+</section>
+<section class="paso" id="p7">
+  <button class="cab" onclick="toggle(this)" aria-expanded="false">
+    <span class="num">7</span>
+    <span class="tt">
+      <span class="eb">harness</span>
+      <span class="ti">Supervisar</span>
+      <span class="ap">Estructurar y empaquetar un sistema confiable y programado · <b>15 min</b></span>
+    </span>
+    <span class="chev">⌄</span>
+  </button>
+  <div class="cuerpo"><div class="cuerpo-in">
+    <ul><li>Poné a prueba tu sistema, buscando vulnerabilidades, mejoras, eficiencias, puntos ciegos, entre otros</li><li>Podes probar crear límites a cada agente, como permisos, tiempo de acción, capacidades, integraciones, entre otros.</li><li>Pensalo como un sistema continuo. Qué tipo de aprendizajes o actualización de memoria hace sentido tener en corridas futuras?</li></ul>
+    <div class="pbox">
+      <div class="pbar"><span>prompt para copiar y pegar en claude</span>
+        <button class="cop" onclick="copiar(this)">COPIAR</button></div>
+      <pre>Quiero que revises todo el código generado del proceso punta a punta y levantes como mínimo 10 propuestas de mejora en la confiabilidad y eficiencia del sistema, clasificadas por impacto.
+
+Luego, quiero un script de validacion que corra todos los chequeos del sistema y
+devuelva verde o rojo, sin opinar.
+
+Como minimo, algunos ejemplos:
+- ninguna propiedad sin identificador, y ninguno repetido
+- ningun precio nulo o menor o igual a cero
+- el archivo de salida del buscador declara por que se detuvo
+- Notion y el snapshot coinciden en cantidad y en los valores de cada fila
+- los KPIs recalculados dan lo mismo que los guardados
+- los grupos de menos de 5 propiedades no reportan percentil
+- hay un mensaje redactado por cada propiedad que marque para visitar
+- ningun bloqueo de agenda quedo como confirmado
+
+Que falle ruidosamente. Si un chequeo no pasa, el paso no cierra.
+
+Para las propuestas que apruebe realizar, agregalas al backlog para planificar su desarrollo.</pre>
+    </div>
+    <label class="hecho"><input type="checkbox" data-paso="7" onchange="marcar()"> Terminé este paso</label>
+  </div></div>
+</section>
+  </section>
+
+  <section class="blk" id="problemas">
+    <div class="eyebrow">cuando algo falla</div>
+    <h2>Cosas que pueden pasar</h2>
+    <ul class="simple"><li><b>El portal me devuelve una redirección y no veo nada</b> — Copiale y pegale el resultado a Claude, compartile un screenshot. Hacé troubleshooting con la IA.</li><li><b><code>pip install</code> falla con <em>externally-managed-environment</em></b> — El Python de Homebrew no deja instalar paquetes al sistema. Creá un entorno virtual del proyecto: <code>python3 -m venv .venv</code> y después <code>.venv/bin/pip install …</code></li><li><b>La paginación me trae resultados repetidos</b> — El parámetro de paginación del portal empieza en 1, no en 0. Si calculás el offset como <code>(pagina-1)*48</code> vas a repetir un resultado por página, y el deduplicado te lo va a tapar.</li><li><b>El filtro de precio en la URL no hace nada</b> — Recorda que algunas propiedades pueden estar publicadas en CLP y otras en UF, lo cual requiere homologar los valores en el proceso</li><li><b>Claude no ve lo que yo estoy viendo</b> — Sacá una captura y pegásela en el chat. Consume tokens pero a veces es útil para resolver problemas. En un caso extremo podés darle control con MCP Chrome y que revise autónomamente la página.</li><li><b>Algo se rompió y no sé qué toqué</b> — Para eso versionás. Volvé al último estado que funcionaba y pedile el cambio otra vez, más chico.</li></ul>
+  </section>
+</main>
+
+<footer>Artefact · Taller MBA UC · sistema de agentes</footer>
+
+<script>
+var K='taller-mba-uc-avance';
+
+
+function toggle(b){
+  b.closest('.paso').classList.toggle('abierta');
+  b.setAttribute('aria-expanded', b.closest('.paso').classList.contains('abierta')); }
+function copiar(b){
+  var t=b.closest('.pbox').querySelector('pre').textContent;
+  navigator.clipboard.writeText(t).then(function(){
+    b.textContent='COPIADO'; b.classList.add('ok');
+    setTimeout(function(){ b.textContent='COPIAR'; b.classList.remove('ok'); },2000);
+  });
+}
+function marcar(){
+  var c=[].slice.call(document.querySelectorAll('.hecho input'));
+  var hechos=c.filter(function(x){return x.checked}).map(function(x){return x.dataset.paso});
+  document.getElementById('av').textContent=hechos.length;
+  try{ localStorage.setItem(K, JSON.stringify(hechos)); }catch(e){}
+}
+(function(){
+  try{ var h=JSON.parse(localStorage.getItem(K)||'[]');
+    h.forEach(function(n){ var i=document.querySelector('.hecho input[data-paso="'+n+'"]'); if(i) i.checked=true; });
+  }catch(e){}
+  marcar();
+  var links=[].slice.call(document.querySelectorAll('#nav a'));
+  var obs=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      links.forEach(function(a){ a.classList.toggle('on', a.dataset.anchor===e.target.id); });
+    });
+  },{rootMargin:'-70px 0px -70% 0px'});
+  document.querySelectorAll('.blk,.paso').forEach(function(s){ if(s.id) obs.observe(s); });
+  var p1=document.getElementById('p1'); if(p1) p1.classList.add('abierta');
+})();
+</script></body></html>

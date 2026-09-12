@@ -1,0 +1,84 @@
+# supuestos.yaml — base inicial para los alumnos
+#
+# Estos numeros NO son un dato observado del mercado: son un punto de partida
+# para que nadie arranque de cero. La primera tarea seria del paso 5 es
+# reemplazarlos mirando Airbnb en la zona y firmar los propios.
+#
+# Las curvas de 2D2B salen literalmente de simulador-hipotecario-chile.html.
+# Las demas tipologias se derivan con un factor de escala declarado abajo.
+#
+# El hash de este archivo queda en el manifest de cada corrida. Si cambia,
+# el ranking de ayer y el de hoy no son comparables — y se sabe.
+
+firmado_por: bruno
+fecha: 2026-08-19
+version: 1
+
+# ene      feb      mar      abr      may      jun      jul      ago      sep      oct      nov      dic
+meses: ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+
+tipologias:
+  1D1B:
+    factor_tarifa: 0.68   # vs 2D2B
+    delta_ocupacion: +5      # puntos porcentuales vs 2D2B
+    tarifa_noche_clp: [ 82000,  82000,  75000,  65000,  54000,  51000,  51000,  54000,  65000,  71000,  75000,  82000]
+    ocupacion_pct:    [    90,     90,     85,     80,     70,     65,     65,     70,     80,     80,     85,     90]
+
+  2D1B:
+    factor_tarifa: 0.85   # vs 2D2B
+    delta_ocupacion: +2      # puntos porcentuales vs 2D2B
+    tarifa_noche_clp: [102000, 102000,  94000,  81000,  68000,  64000,  64000,  68000,  81000,  89000,  94000, 102000]
+    ocupacion_pct:    [    87,     87,     82,     77,     67,     62,     62,     67,     77,     77,     82,     87]
+
+  2D2B:
+    factor_tarifa: 1.00   # vs 2D2B
+    delta_ocupacion: +0      # puntos porcentuales vs 2D2B
+    tarifa_noche_clp: [120000, 120000, 110000,  95000,  80000,  75000,  75000,  80000,  95000, 105000, 110000, 120000]
+    ocupacion_pct:    [    85,     85,     80,     75,     65,     60,     60,     65,     75,     75,     80,     85]
+
+  3D2B:
+    factor_tarifa: 1.30   # vs 2D2B
+    delta_ocupacion: -8      # puntos porcentuales vs 2D2B
+    tarifa_noche_clp: [156000, 156000, 143000, 124000, 104000,  98000,  98000, 104000, 124000, 136000, 143000, 156000]
+    ocupacion_pct:    [    77,     77,     72,     67,     57,     52,     52,     57,     67,     67,     72,     77]
+
+# --- Credito hipotecario (sistema frances) ---
+credito:
+  pie_pct: 20
+  tasa_anual_pct: 4.0
+  plazo_anos: 30
+  seguro_mensual_pct_sobre_principal: 0.018
+
+# --- Costos de operacion. Constantes para toda propiedad. ---
+# 'servicios_basicos' incluye agua, luz, gas, internet Y GASTOS COMUNES.
+# Por eso los gastos comunes no se scrapean del portal.
+costos_operacion:
+  estadia_promedio_noches: 3
+  limpieza_por_rotacion_clp: 35000
+  mantencion_mensual_clp: 50000
+  fee_administracion_pct: 5
+  fee_plataforma_pct: 3
+  servicios_basicos_mensual_clp: 160000
+  contribuciones_anual_clp: 0
+  otros_mensual_clp: 0
+
+# --- Equipamiento inicial. Se repone cada 'vida_anos'. ---
+equipamiento:
+  - { item: muebles,              costo_clp:  2000000, vida_anos: 5 }
+  - { item: electrodomesticos,    costo_clp:  1500000, vida_anos: 8 }
+  - { item: pintura,              costo_clp:   700000, vida_anos: 6 }
+  - { item: decoracion,           costo_clp:   700000, vida_anos: 5 }
+  - { item: equipamiento_cocina,  costo_clp:  1500000, vida_anos: 5 }
+  - { item: ropa_cama_toallas,    costo_clp:  1100000, vida_anos: 3 }
+
+# --- Evaluacion ---
+evaluacion:
+  tasa_descuento_anual_pct: 5
+  horizonte_anos: 30
+
+# --- UF ---
+# Input manual. El valor de abajo es del 19-ago-2026.
+# Si queres el del dia, el SII publica la tabla diaria del anio completo en
+# https://www.sii.cl/valores_y_fechas/uf/uf2026.htm  (curl plano alcanza, no
+# necesita navegador; ojo que la pagina viene en ISO-8859-1, no UTF-8).
+uf_clp: 40855.33
