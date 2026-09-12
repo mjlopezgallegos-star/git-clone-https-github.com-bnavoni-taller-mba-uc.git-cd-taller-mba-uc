@@ -138,19 +138,35 @@ sin corte automático. ✅
 
 ---
 
-## ⬜ 6 · Contactar y agendar
+## 🟡 6 · Contactar y agendar
 
-Solo sobre las propiedades marcadas como aprobadas (máx. 3). Entrar a la
-ficha individual de cada una, extraer corredora/teléfono/mail, redactar un
-mensaje (mail o WhatsApp según el dato disponible), dejar el borrador listo
-en Gmail, proponer 3 horarios según disponibilidad real en Calendar (L-V
-8-10 y 17-19h, sábados 9-13h, máx. 7 días adelante), y generar un bloqueo
-TENTATIVO por visita.
+**Estado:** en progreso. Propiedades aprobadas para visita (Notion,
+`Aprobado visita = true`): **Neohaus La Dehesa (MLC-4437057464)** y
+**Parque El Rodeo Encino (MLC-1997643357)** — ambas en Lo Barnechea,
+confirmado por la ficha impresa (no por las 3 originales, que se
+reemplazaron a pedido de la usuaria).
 
-**No negociable:** no se envía nada.
+Contacto de cada inmobiliaria (Neohaus Inmobiliaria / SSILVA Gestión
+Inmobiliaria) salió de una búsqueda web, no de la ficha (los proyectos de
+desarrolladora no publican teléfono/mail directo ahí). Mensajes redactados
+y contactos guardados en `contacto/paso6_contactos.md`. Horarios
+propuestos (L-V 8-10/17-19h, sáb 9-13h, ≤7 días) verificados contra la
+agenda real de la usuaria vía Calendar — semana del 12 al 19-sep-2026
+libre.
 
-**Éxito:** mensaje redactado por cada aprobada, borrador sin enviar,
-bloqueo tentativo por visita.
+**Pendiente (bloqueado por permisos de conector, no por diseño):**
+- Gmail conectado pero sin scope de borradores — falta reconectar con
+  permiso de compose/drafts para crear los 2 borradores reales.
+- Google Calendar conectado pero de solo lectura — falta reconectar con
+  permiso de edición para crear los 2 bloqueos TENTATIVOS.
+
+**No negociable:** no se envía nada. Los bloqueos de calendario, cuando se
+puedan crear, van sin invitados (para no disparar un envío automático) y
+con "TENTATIVO" en el título.
+
+**Éxito:** mensaje redactado por cada aprobada ✅, borrador sin enviar en
+Gmail ⬜ (pendiente permiso), bloqueo tentativo por visita ⬜ (pendiente
+permiso).
 
 ---
 
