@@ -66,6 +66,25 @@ la fuente de verdad de lo decidido; `CLAUDE.md` trae las reglas de trabajo y
 - Columnas nuevas en Notion: `UF por m2`, `Ranking en tipologia`,
   `Percentil en tipologia`, `Grupo chico`, `Rango m2`.
 
+## Evaluador financiero (paso 5)
+
+- Archivo: `evaluador/evaluador-financiero.html` — standalone, sin
+  dependencias externas, abre con doble clic.
+- Analiza las **6 propiedades marcadas "Aprobado evaluador"** en Notion
+  (< 6.000 UF, todas 1D1B).
+- Fórmulas (aprobadas antes de escribir el archivo): cuota francesa,
+  ingresos con curva de 12 meses por tipología, costos operativos, flujo
+  de caja mensual (año 1) y anual (todo el plazo), punto de equilibrio
+  por flujo acumulado *y* por ocupación mínima requerida, VPN y ROI con
+  escenario de venta/plusvalía, sensibilidad de cuota (tasa × pie),
+  clasificación de renta (ratio cuota/renta editable, default 30%).
+- `pie_pct` arranca en 10% en pantalla (no el 20% de `supuestos.yaml`),
+  todos los supuestos editables, recalculo instantáneo, comparación lado a
+  lado de las 6 propiedades.
+- UF: intenta traer el valor actual desde el navegador de quien lo abre
+  (no desde este entorno); si el SII bloquea la petición (CORS), avisa y
+  deja el valor de `supuestos.yaml` como respaldo editable a mano.
+
 ## Cortes y cantidades por paso
 
 | Momento | Parámetro | Valor |

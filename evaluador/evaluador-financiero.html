@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Evaluador financiero — Agente Airbnb Lo Barnechea</title>
+<style>
+:root{
+  --ink:#132033; --muted:#5b6b82; --border:#dfe4ec; --surface:#f4f6f9;
+  --accent:#0f6e57; --accent2:#b3541e; --bad:#a02b2b; --good:#1a7a45;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);color:var(--ink);background:#fff;font-size:14px;line-height:1.5}
+header{padding:18px 22px;border-bottom:1px solid var(--border);background:var(--surface)}
+header h1{margin:0 0 4px;font-size:20px}
+header p{margin:0;color:var(--muted);font-size:13px}
+main{display:grid;grid-template-columns:340px 1fr;gap:0;min-height:calc(100vh - 70px)}
+@media (max-width:900px){main{grid-template-columns:1fr}}
+.panel{padding:18px;border-right:1px solid var(--border);overflow-y:auto;max-height:calc(100vh - 70px)}
+.content{padding:18px 22px;overflow-y:auto}
+h2{font-size:15px;margin:22px 0 10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+h2:first-child{margin-top:0}
+.card{border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px;background:#fff}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.row label{font-size:12.5px;color:var(--muted);flex:1}
+.row input[type=number],.row input[type=text]{width:110px;padding:5px 7px;border:1px solid var(--border);border-radius:6px;font-family:var(--mono);font-size:12.5px;text-align:right}
+.row input[type=range]{flex:1}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--border);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase}
+.curva-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;font-size:11px}
+.curva-grid input{width:100%;padding:3px;border:1px solid var(--border);border-radius:4px;text-align:center;font-size:11px}
+.curva-grid span{display:block;text-align:center;color:var(--muted);font-size:10px;margin-bottom:1px}
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:7px 12px;border:1px solid var(--border);border-radius:99px;cursor:pointer;font-size:12.5px;background:#fff}
+.tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.kpi{border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.kpi .l{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.kpi .v{font-size:19px;font-weight:700;margin-top:2px}
+.kpi .v.bad{color:var(--bad)} .kpi .v.good{color:var(--good)}
+svg{display:block;max-width:100%}
+.chart-box{border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:16px}
+.chart-box h3{margin:0 0 8px;font-size:13px}
+.hint{font-size:11.5px;color:var(--muted);margin-top:4px}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
+.pill.ok{background:#e3f3ea;color:var(--good)}
+.pill.no{background:#fbe9e7;color:var(--bad)}
+.heat td{font-family:var(--mono);font-size:11px}
+select{padding:5px 7px;border:1px solid var(--border);border-radius:6px;font-size:12.5px}
+button{cursor:pointer;border:1px solid var(--border);background:#fff;border-radius:6px;padding:6px 10px;font-size:12px}
+button:hover{border-color:var(--ink)}
+.footnote{font-size:11px;color:var(--muted);margin-top:20px;border-top:1px solid var(--border);padding-top:10px}
+.warn{background:#fff6e8;border:1px solid #f0d9a6;border-radius:8px;padding:8px 10px;font-size:12px;margin-top:6px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Evaluador financiero — Agente Airbnb Lo Barnechea</h1>
+  <p>Archivo único, sin dependencias externas. Supuestos editables abajo a la izquierda. Todo se recalcula al vuelo.</p>
+</header>
+
+<main>
+<div class="panel" id="panel"></div>
+<div class="content" id="content"></div>
+</main>
+
+<script>
+/* ---------- datos embebidos (supuestos.yaml + snapshot de Notion al generar este archivo) ---------- */
+
+const DIAS_MES = [31,28,31,30,31,30,31,31,30,31,30,31];
+const NOMBRES_MES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+
+const SUPUESTOS_DEFAULT = {
+  tipologias: {
+    "1D1B": { tarifa_noche_clp:[82000,82000,75000,65000,54000,51000,51000,54000,65000,71000,75000,82000],
+              ocupacion_pct:[90,90,85,80,70,65,65,70,80,80,85,90] },
+    "2D1B": { tarifa_noche_clp:[102000,102000,94000,81000,68000,64000,64000,68000,81000,89000,94000,102000],
+              ocupacion_pct:[87,87,82,77,67,62,62,67,77,77,82,87] },
+    "2D2B": { tarifa_noche_clp:[120000,120000,110000,95000,80000,75000,75000,80000,95000,105000,110000,120000],
+              ocupacion_pct:[85,85,80,75,65,60,60,65,75,75,80,85] },
+    "3D2B": { tarifa_noche_clp:[156000,156000,143000,124000,104000,98000,98000,104000,124000,136000,143000,156000],
+              ocupacion_pct:[77,77,72,67,57,52,52,57,67,67,72,77] }
+  },
+  // pie_pct arranca en 10 (no el 20 del archivo original) segun specs.md — sigue editable.
+  credito: { pie_pct: 10, tasa_anual_pct: 4.0, plazo_anos: 30, seguro_mensual_pct_sobre_principal: 0.018 },
+  costos_operacion: { estadia_promedio_noches:3, limpieza_por_rotacion_clp:35000, mantencion_mensual_clp:50000,
+                      fee_administracion_pct:5, fee_plataforma_pct:3, servicios_basicos_mensual_clp:160000,
+                      contribuciones_anual_clp:0, otros_mensual_clp:0 },
+  equipamiento: [
+    {item:"muebles", costo_clp:2000000, vida_anos:5},
+    {item:"electrodomesticos", costo_clp:1500000, vida_anos:8},
+    {item:"pintura", costo_clp:700000, vida_anos:6},
+    {item:"decoracion", costo_clp:700000, vida_anos:5},
+    {item:"equipamiento_cocina", costo_clp:1500000, vida_anos:5},
+    {item:"ropa_cama_toallas", costo_clp:1100000, vida_anos:3}
+  ],
+  evaluacion: { tasa_descuento_anual_pct:5, horizonte_anos:30 },
+  uf_clp: 40855.33,
+  uf_clp_fecha: "2026-08-19"
+};
+
+// Propiedades aprobadas para el evaluador (< 6.000 UF), snapshot al 2026-09-12.
+// Si se aprueban otras en Notion despues, hay que agregarlas aca a mano.
+const PROPIEDADES = [
+  {id:"MLC-4462323602", titulo:"Departamento En Venta De 1 Dorm. En Las Condes", tipologia:"1D1B", precio_uf:4800, m2:45},
+  {id:"MLC-4023554746", titulo:"Vendo Depto Como Nuevo 1d 1b 1e 1bd, San Damián, Las Condes", tipologia:"1D1B", precio_uf:4950, m2:37},
+  {id:"MLC-4443889368", titulo:"Departamento En Venta En Las Condes", tipologia:"1D1B", precio_uf:5100, m2:40},
+  {id:"MLC-3521278834", titulo:"Edificio Nueva Vitacura", tipologia:"1D1B", precio_uf:5659, m2:43},
+  {id:"MLC-1997643357", titulo:"Parque El Rodeo Encino", tipologia:"1D1B", precio_uf:5756, m2:46},
+  {id:"MLC-4437057464", titulo:"Neohaus La Dehesa", tipologia:"1D1B", precio_uf:5900, m2:48},
+];
+
+/* ---------- estado ---------- */
+let S = JSON.parse(JSON.stringify(SUPUESTOS_DEFAULT));
+let seleccionado = 0;
+let escenario = { renta_liquida_clp: 3000000, ratio_max_dividendo: 30, plusvalia_pct: 3, anio_venta: 10 };
+
+/* ---------- formulas ---------- */
+
+function cuotaFrancesa(principalCLP, tasaAnualPct, plazoAnos, seguroPct){
+  const i = tasaAnualPct/100/12;
+  const n = plazoAnos*12;
+  const cuotaCredito = i===0 ? principalCLP/n : principalCLP*i/(1-Math.pow(1+i,-n));
+  const seguro = principalCLP*seguroPct/100;
+  return {i, n, cuotaCredito, seguro, cuotaTotal: cuotaCredito+seguro};
+}
+
+function tablaAmortizacion(principalCLP, i, n, cuotaCredito){
+  let saldo = principalCLP;
+  const filas = [];
+  for(let t=1;t<=n;t++){
+    const interes = saldo*i;
+    let amort = cuotaCredito-interes;
+    if(amort>saldo) amort=saldo;
+    saldo = Math.max(0, saldo-amort);
+    filas.push({t, interes, amort, saldo});
+  }
+  return filas;
+}
+
+function saldoInsoluto(principalCLP, i, n, mesesTranscurridos){
+  if(mesesTranscurridos>=n) return 0;
+  if(i===0) return principalCLP*(1-mesesTranscurridos/n);
+  return principalCLP*(Math.pow(1+i,n)-Math.pow(1+i,mesesTranscurridos))/(Math.pow(1+i,n)-1);
+}
+
+function ingresosMensuales(curva){
+  return curva.tarifa_noche_clp.map((t,m)=> t*(curva.ocupacion_pct[m]/100)*DIAS_MES[m]);
+}
+
+function costosMensuales(curva, ingresosMes, co){
+  return ingresosMes.map((ing,m)=>{
+    const rotaciones = DIAS_MES[m]*(curva.ocupacion_pct[m]/100)/co.estadia_promedio_noches;
+    const limpieza = rotaciones*co.limpieza_por_rotacion_clp;
+    const feeAdmin = ing*co.fee_administracion_pct/100;
+    const feePlat  = ing*co.fee_plataforma_pct/100;
+    const fijo = co.mantencion_mensual_clp + co.servicios_basicos_mensual_clp + co.contribuciones_anual_clp/12 + co.otros_mensual_clp;
+    return {rotaciones, limpieza, feeAdmin, feePlat, fijo, total: limpieza+feeAdmin+feePlat+fijo};
+  });
+}
+
+function ocupacionEquilibrio(tarifaNoche, diasMes, costoMes, cuotaTotal){
+  // ocupacion (0-1) que hace ingreso = costo_operativo + cuota (costo_operativo aca excluye limpieza/fees
+  // que dependen de la propia ocupacion -> se resuelve la ecuacion lineal exacta)
+  // ingreso = tarifa*occ*dias ; costo = fijo + limpieza(occ) + feeAdmin(occ)+feePlat(occ)
+  // tarifa*occ*dias = fijo + occ*dias/estadia*limpiezaUnit + occ*tarifa*dias*(feeAdminPct+feePlatPct) + cuota
+  // despejar occ:
+  return null; // se calcula inline en calcularPropiedad con los parametros correspondientes
+}
+
+function calcularPropiedad(prop, S){
+  const curva = S.tipologias[prop.tipologia];
+  const co = S.costos_operacion;
+  const cred = S.credito;
+
+  const precioCLP = prop.precio_uf*S.uf_clp;
+  const pieCLP = precioCLP*cred.pie_pct/100;
+  const principalCLP = precioCLP-pieCLP;
+  const {i,n,cuotaCredito,seguro,cuotaTotal} = cuotaFrancesa(principalCLP, cred.tasa_anual_pct, cred.plazo_anos, cred.seguro_mensual_pct_sobre_principal);
+
+  const ingresosMes = ingresosMensuales(curva);
+  const costosMes = costosMensuales(curva, ingresosMes, co);
+  const flujoMesArr = ingresosMes.map((ing,m)=> ing - costosMes[m].total - cuotaTotal);
+
+  const equipoInicialCLP = S.equipamiento.reduce((a,e)=>a+e.costo_clp,0);
+  const inversionInicialCLP = pieCLP + equipoInicialCLP;
+
+  // ocupacion de equilibrio por mes (despeje lineal exacto)
+  const ocupEquilibrioMes = curva.tarifa_noche_clp.map((tarifa,m)=>{
+    const dias = DIAS_MES[m];
+    const a = tarifa*dias; // coef de occ en ingreso
+    const limpiezaCoef = (dias/co.estadia_promedio_noches)*co.limpieza_por_rotacion_clp; // coef de occ en limpieza
+    const feeCoef = tarifa*dias*(co.fee_administracion_pct/100+co.fee_plataforma_pct/100); // coef de occ en fees
+    const fijo = co.mantencion_mensual_clp+co.servicios_basicos_mensual_clp+co.contribuciones_anual_clp/12+co.otros_mensual_clp+cuotaTotal;
+    // a*occ = fijo + limpiezaCoef*occ + feeCoef*occ  ->  occ = fijo / (a - limpiezaCoef - feeCoef)
+    const denom = a-limpiezaCoef-feeCoef;
+    const occ = denom>0 ? fijo/denom : Infinity;
+    return Math.max(0, occ*100);
+  });
+
+  // flujo acumulado mensual a lo largo del horizonte (repite la curva anual, aplica reposicion de equipamiento
+  // en el ultimo mes de cada anio que corresponda, y detiene la cuota despues del plazo del credito)
+  const horizonteMeses = S.evaluacion.horizonte_anos*12;
+  let acumulado = -inversionInicialCLP;
+  const serieMensual = [{mes:0, acumulado}];
+  let mesEquilibrio = null;
+  for(let mAbs=1; mAbs<=horizonteMeses; mAbs++){
+    const mIdx = (mAbs-1)%12;
+    const anio = Math.ceil(mAbs/12);
+    const cuotaDelMes = mAbs<=n ? cuotaTotal : 0;
+    let flujo = ingresosMes[mIdx]-costosMes[mIdx].total-cuotaDelMes;
+    if(mIdx===11){ // diciembre del anio -> reposicion si corresponde
+      const repos = S.equipamiento.filter(e=>anio%e.vida_anos===0).reduce((a,e)=>a+e.costo_clp,0);
+      flujo -= repos;
+    }
+    acumulado += flujo;
+    serieMensual.push({mes:mAbs, acumulado});
+    if(mesEquilibrio===null && acumulado>=0) mesEquilibrio = mAbs;
+  }
+
+  // flujos anuales (para VPN)
+  const ingresoAnual = ingresosMes.reduce((a,b)=>a+b,0);
+  const costoAnual = costosMes.reduce((a,c)=>a+c.total,0);
+  const flujosAnuales = [];
+  for(let anio=1; anio<=S.evaluacion.horizonte_anos; anio++){
+    const cuotaAnual = anio<=cred.plazo_anos ? cuotaTotal*12 : 0;
+    const repos = S.equipamiento.filter(e=>anio%e.vida_anos===0).reduce((a,e)=>a+e.costo_clp,0);
+    flujosAnuales.push(ingresoAnual-costoAnual-cuotaAnual-repos);
+  }
+
+  function vpn(tasaDescPct, hastaAnio){
+    const td = tasaDescPct/100;
+    let v = -inversionInicialCLP;
+    for(let a=1;a<=hastaAnio;a++){
+      let flujo = flujosAnuales[a-1];
+      if(a===hastaAnio && escenario.anio_venta===a){
+        const valorVenta = prop.precio_uf*S.uf_clp*Math.pow(1+escenario.plusvalia_pct/100,a);
+        const saldo = saldoInsoluto(principalCLP,i,n,a*12);
+        flujo += (valorVenta-saldo);
+      }
+      v += flujo/Math.pow(1+td,a);
+    }
+    return v;
+  }
+
+  const anioVenta = Math.min(escenario.anio_venta, S.evaluacion.horizonte_anos);
+  const valorVentaEnX = prop.precio_uf*S.uf_clp*Math.pow(1+escenario.plusvalia_pct/100, anioVenta);
+  const saldoEnX = saldoInsoluto(principalCLP,i,n,anioVenta*12);
+  const flujoVentaX = valorVentaEnX-saldoEnX;
+  const flujosAcumHastaX = flujosAnuales.slice(0,anioVenta).reduce((a,b)=>a+b,0);
+  const roiVenta = (flujosAcumHastaX+flujoVentaX-inversionInicialCLP)/inversionInicialCLP;
+  const vpnConVenta = vpn(S.evaluacion.tasa_descuento_anual_pct, anioVenta);
+
+  const rentaMinimaRequerida = cuotaTotal/(escenario.ratio_max_dividendo/100);
+  const accesoCredito = escenario.renta_liquida_clp>0 ? (cuotaTotal/escenario.renta_liquida_clp*100) : null;
+
+  return {
+    prop, precioCLP, pieCLP, principalCLP, i, n, cuotaCredito, seguro, cuotaTotal,
+    ingresosMes, costosMes, flujoMesArr, equipoInicialCLP, inversionInicialCLP,
+    ocupEquilibrioMes, serieMensual, mesEquilibrio, flujosAnuales,
+    anioVenta, valorVentaEnX, saldoEnX, flujoVentaX, roiVenta, vpnConVenta,
+    rentaMinimaRequerida, accesoCredito, curva
+  };
+}
+
+/* ---------- formato ---------- */
+const fmtCLP = n => "$"+Math.round(n).toLocaleString("es-CL");
+const fmtUF  = n => n.toLocaleString("es-CL",{maximumFractionDigits:1})+" UF";
+const fmtPct = n => n.toLocaleString("es-CL",{maximumFractionDigits:1})+"%";
+
+/* ---------- charts SVG (sin librerias) ---------- */
+function svgLineChart(series, {w=560,h=220,color="#0f6e57",zeroLine=true,xlabel="",ylabel=""}={}){
+  const pad = {l:70,r:16,t:14,b:28};
+  const xs = series.map(p=>p.x), ys = series.map(p=>p.y);
+  const xMin=Math.min(...xs), xMax=Math.max(...xs);
+  const yMin=Math.min(0,...ys), yMax=Math.max(0,...ys);
+  const sx = x => pad.l + (x-xMin)/(xMax-xMin||1)*(w-pad.l-pad.r);
+  const sy = y => h-pad.b - (y-yMin)/(yMax-yMin||1)*(h-pad.t-pad.b);
+  const path = series.map((p,i)=>(i===0?"M":"L")+sx(p.x).toFixed(1)+","+sy(p.y).toFixed(1)).join(" ");
+  let zero = "";
+  if(zeroLine && yMin<0 && yMax>0){
+    zero = `<line x1="${pad.l}" y1="${sy(0)}" x2="${w-pad.r}" y2="${sy(0)}" stroke="#c7cdd8" stroke-dasharray="4,3"/>`;
+  }
+  const yTicks=4, ticks=[];
+  for(let t=0;t<=yTicks;t++){
+    const val = yMin + (yMax-yMin)*t/yTicks;
+    ticks.push(`<text x="${pad.l-6}" y="${sy(val)+4}" font-size="10" fill="#5b6b82" text-anchor="end">${(val/1e6).toFixed(1)}M</text>`);
+    ticks.push(`<line x1="${pad.l}" y1="${sy(val)}" x2="${w-pad.r}" y2="${sy(val)}" stroke="#eef1f5"/>`);
+  }
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%">
+    ${ticks.join("")}
+    ${zero}
+    <path d="${path}" fill="none" stroke="${color}" stroke-width="2"/>
+    <text x="${pad.l}" y="${h-6}" font-size="10" fill="#5b6b82">${xlabel}</text>
+  </svg>`;
+}
+
+function svgStackedBars(filasPorAnio, {w=560,h=220}={}){
+  const pad={l:70,r:16,t:14,b:28};
+  const n = filasPorAnio.length;
+  const maxV = Math.max(...filasPorAnio.map(f=>f.interes+f.amort));
+  const bw = (w-pad.l-pad.r)/n*0.7;
+  const gap = (w-pad.l-pad.r)/n;
+  const sy = v => h-pad.b - v/maxV*(h-pad.t-pad.b);
+  let bars="";
+  filasPorAnio.forEach((f,idx)=>{
+    const x = pad.l+idx*gap+ (gap-bw)/2;
+    const hInt = (h-pad.b)-sy(f.interes);
+    const hAmo = (h-pad.b)-sy(f.amort);
+    bars += `<rect x="${x}" y="${sy(f.interes)}" width="${bw}" height="${hInt}" fill="#b3541e"/>`;
+    bars += `<rect x="${x}" y="${sy(f.interes+f.amort)}" width="${bw}" height="${hAmo}" fill="#0f6e57"/>`;
+    if(n<=15 || idx%Math.ceil(n/15)===0){
+      bars += `<text x="${x+bw/2}" y="${h-pad.b+12}" font-size="9" fill="#5b6b82" text-anchor="middle">${f.anio}</text>`;
+    }
+  });
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%">
+    <text x="${pad.l}" y="12" font-size="10" fill="#b3541e">■ interés</text>
+    <text x="${pad.l+55}" y="12" font-size="10" fill="#0f6e57">■ amortización</text>
+    ${bars}
+  </svg>`;
+}
+
+function svgHeatmap(rows, cols, matrix, fmt){
+  let html = `<table class="heat"><tr><th></th>`+cols.map(c=>`<th>${c}</th>`).join("")+`</tr>`;
+  const flat = matrix.flat();
+  const mn=Math.min(...flat), mx=Math.max(...flat);
+  rows.forEach((r,ri)=>{
+    html += `<tr><th>${r}</th>`;
+    matrix[ri].forEach(v=>{
+      const t = (v-mn)/((mx-mn)||1);
+      const bg = `rgba(179,84,30,${0.08+t*0.55})`;
+      html += `<td style="background:${bg}">${fmt(v)}</td>`;
+    });
+    html += `</tr>`;
+  });
+  return html+`</table>`;
+}
+
+/* ---------- render ---------- */
+function renderPanel(){
+  const cred=S.credito, co=S.costos_operacion, ev=S.evaluacion;
+  let html = `<h2>Propiedad</h2><div class="card">
+    <select id="selProp" style="width:100%">
+      ${PROPIEDADES.map((p,i)=>`<option value="${i}" ${i===seleccionado?"selected":""}>${p.id} — ${fmtUF(p.precio_uf)}</option>`).join("")}
+    </select>
+  </div>
+
+  <h2>UF</h2><div class="card">
+    <div class="row"><label>Valor UF (CLP)</label><input type="number" id="uf_clp" value="${S.uf_clp}" step="0.01"></div>
+    <div class="hint">Referencia ${S.uf_clp_fecha}. <button id="btnUF">Actualizar desde SII</button></div>
+    <div id="ufWarn"></div>
+  </div>
+
+  <h2>Crédito</h2><div class="card">
+    <div class="row"><label>Pie (%)</label><input type="number" id="pie_pct" value="${cred.pie_pct}" step="1"></div>
+    <div class="row"><label>Tasa anual (%)</label><input type="number" id="tasa_anual_pct" value="${cred.tasa_anual_pct}" step="0.1"></div>
+    <div class="row"><label>Plazo (años)</label><input type="number" id="plazo_anos" value="${cred.plazo_anos}" step="1"></div>
+    <div class="row"><label>Seguro mensual (% principal)</label><input type="number" id="seguro_pct" value="${cred.seguro_mensual_pct_sobre_principal}" step="0.001"></div>
+  </div>
+
+  <h2>Costos de operación (mensuales, CLP salvo %)</h2><div class="card">
+    <div class="row"><label>Noches por rotación</label><input type="number" id="estadia" value="${co.estadia_promedio_noches}" step="1"></div>
+    <div class="row"><label>Limpieza por rotación</label><input type="number" id="limpieza" value="${co.limpieza_por_rotacion_clp}" step="1000"></div>
+    <div class="row"><label>Mantención mensual</label><input type="number" id="mantencion" value="${co.mantencion_mensual_clp}" step="1000"></div>
+    <div class="row"><label>Fee administración (%)</label><input type="number" id="feeAdmin" value="${co.fee_administracion_pct}" step="0.5"></div>
+    <div class="row"><label>Fee plataforma (%)</label><input type="number" id="feePlat" value="${co.fee_plataforma_pct}" step="0.5"></div>
+    <div class="row"><label>Servicios básicos + GGCC</label><input type="number" id="servicios" value="${co.servicios_basicos_mensual_clp}" step="1000"></div>
+    <div class="row"><label>Contribuciones (anual)</label><input type="number" id="contrib" value="${co.contribuciones_anual_clp}" step="1000"></div>
+    <div class="row"><label>Otros mensuales</label><input type="number" id="otros" value="${co.otros_mensual_clp}" step="1000"></div>
+  </div>
+
+  <h2>Tarifa y ocupación — ${PROPIEDADES[seleccionado].tipologia}</h2><div class="card">
+    <div class="curva-grid">
+      ${NOMBRES_MES.map((m,i)=>`<span>${m}</span>`).join("")}
+      ${S.tipologias[PROPIEDADES[seleccionado].tipologia].tarifa_noche_clp.map((v,i)=>`<input type="number" class="tarifa" data-i="${i}" value="${v}" step="1000">`).join("")}
+      ${S.tipologias[PROPIEDADES[seleccionado].tipologia].ocupacion_pct.map((v,i)=>`<input type="number" class="ocup" data-i="${i}" value="${v}" step="1">`).join("")}
+    </div>
+    <div class="hint">Fila 1: tarifa noche (CLP). Fila 2: ocupación (%).</div>
+  </div>
+
+  <h2>Equipamiento inicial</h2><div class="card">
+    <table>
+      <tr><th>Ítem</th><th>Costo</th><th>Vida (años)</th></tr>
+      ${S.equipamiento.map((e,i)=>`<tr><td>${e.item}</td>
+        <td><input type="number" class="eq_costo" data-i="${i}" value="${e.costo_clp}" step="10000" style="width:90px"></td>
+        <td><input type="number" class="eq_vida" data-i="${i}" value="${e.vida_anos}" step="1" style="width:50px"></td></tr>`).join("")}
+    </table>
+  </div>
+
+  <h2>Evaluación</h2><div class="card">
+    <div class="row"><label>Tasa de descuento anual (%)</label><input type="number" id="tasa_desc" value="${ev.tasa_descuento_anual_pct}" step="0.5"></div>
+    <div class="row"><label>Horizonte (años)</label><input type="number" id="horizonte" value="${ev.horizonte_anos}" step="1"></div>
+  </div>
+
+  <h2>Escenario de venta y renta</h2><div class="card">
+    <div class="row"><label>Plusvalía anual (%)</label><input type="number" id="plusvalia" value="${escenario.plusvalia_pct}" step="0.5"></div>
+    <div class="row"><label>Año de venta</label><input type="number" id="anioVenta" value="${escenario.anio_venta}" step="1"></div>
+    <div class="row"><label>Renta líquida mensual (CLP)</label><input type="number" id="renta" value="${escenario.renta_liquida_clp}" step="50000"></div>
+    <div class="row"><label>Ratio máx. cuota/renta (%)</label><input type="number" id="ratioMax" value="${escenario.ratio_max_dividendo}" step="1"></div>
+  </div>
+
+  <div class="footnote">Sistema francés · datos observados de Portal Inmobiliario (paso 2-4) · supuestos de <code>supuestos.yaml</code>.</div>
+  `;
+  document.getElementById("panel").innerHTML = html;
+  wirePanel();
+}
+
+function wirePanel(){
+  const $ = id=>document.getElementById(id);
+  $("selProp").onchange = e=>{ seleccionado=+e.target.value; renderPanel(); renderContent(); };
+  $("uf_clp").oninput = e=>{ S.uf_clp=+e.target.value||0; renderContent(); };
+  $("pie_pct").oninput = e=>{ S.credito.pie_pct=+e.target.value||0; renderContent(); };
+  $("tasa_anual_pct").oninput = e=>{ S.credito.tasa_anual_pct=+e.target.value||0; renderContent(); };
+  $("plazo_anos").oninput = e=>{ S.credito.plazo_anos=+e.target.value||1; renderContent(); };
+  $("seguro_pct").oninput = e=>{ S.credito.seguro_mensual_pct_sobre_principal=+e.target.value||0; renderContent(); };
+  $("estadia").oninput = e=>{ S.costos_operacion.estadia_promedio_noches=+e.target.value||1; renderContent(); };
+  $("limpieza").oninput = e=>{ S.costos_operacion.limpieza_por_rotacion_clp=+e.target.value||0; renderContent(); };
+  $("mantencion").oninput = e=>{ S.costos_operacion.mantencion_mensual_clp=+e.target.value||0; renderContent(); };
+  $("feeAdmin").oninput = e=>{ S.costos_operacion.fee_administracion_pct=+e.target.value||0; renderContent(); };
+  $("feePlat").oninput = e=>{ S.costos_operacion.fee_plataforma_pct=+e.target.value||0; renderContent(); };
+  $("servicios").oninput = e=>{ S.costos_operacion.servicios_basicos_mensual_clp=+e.target.value||0; renderContent(); };
+  $("contrib").oninput = e=>{ S.costos_operacion.contribuciones_anual_clp=+e.target.value||0; renderContent(); };
+  $("otros").oninput = e=>{ S.costos_operacion.otros_mensual_clp=+e.target.value||0; renderContent(); };
+  $("tasa_desc").oninput = e=>{ S.evaluacion.tasa_descuento_anual_pct=+e.target.value||0; renderContent(); };
+  $("horizonte").oninput = e=>{ S.evaluacion.horizonte_anos=+e.target.value||1; renderContent(); };
+  $("plusvalia").oninput = e=>{ escenario.plusvalia_pct=+e.target.value||0; renderContent(); };
+  $("anioVenta").oninput = e=>{ escenario.anio_venta=+e.target.value||1; renderContent(); };
+  $("renta").oninput = e=>{ escenario.renta_liquida_clp=+e.target.value||0; renderContent(); };
+  $("ratioMax").oninput = e=>{ escenario.ratio_max_dividendo=+e.target.value||1; renderContent(); };
+  document.querySelectorAll(".tarifa").forEach(el=>el.oninput=e=>{
+    S.tipologias[PROPIEDADES[seleccionado].tipologia].tarifa_noche_clp[+e.target.dataset.i]=+e.target.value||0; renderContent();
+  });
+  document.querySelectorAll(".ocup").forEach(el=>el.oninput=e=>{
+    S.tipologias[PROPIEDADES[seleccionado].tipologia].ocupacion_pct[+e.target.dataset.i]=+e.target.value||0; renderContent();
+  });
+  document.querySelectorAll(".eq_costo").forEach(el=>el.oninput=e=>{
+    S.equipamiento[+e.target.dataset.i].costo_clp=+e.target.value||0; renderContent();
+  });
+  document.querySelectorAll(".eq_vida").forEach(el=>el.oninput=e=>{
+    S.equipamiento[+e.target.dataset.i].vida_anos=+e.target.value||1; renderContent();
+  });
+  $("btnUF").onclick = async ()=>{
+    const warn = $("ufWarn");
+    warn.innerHTML = `<div class="hint">Consultando sii.cl…</div>`;
+    try{
+      const resp = await fetch("https://www.sii.cl/valores_y_fechas/uf/uf2026.htm", {mode:"cors"});
+      if(!resp.ok) throw new Error("HTTP "+resp.status);
+      const texto = await resp.text();
+      warn.innerHTML = `<div class="hint">Respuesta recibida — revisá manualmente el valor del día en el texto traído (el formato de esa tabla cambia; este archivo no lo parsea automáticamente) y actualizá el campo de arriba.</div>`;
+    }catch(err){
+      warn.innerHTML = `<div class="warn">No se pudo traer automáticamente (el navegador bloquea la petición al sitio del SII desde un archivo local — es lo esperado, no es un bug). Verificá el valor en <a href="https://www.sii.cl/valores_y_fechas/uf/uf2026.htm" target="_blank">sii.cl</a> y actualizalo a mano arriba.</div>`;
+    }
+  };
+}
+
+let tabActiva = "resumen";
+function renderContent(){
+  const calculos = PROPIEDADES.map(p=>calcularPropiedad(p,S));
+  const c = calculos[seleccionado];
+
+  const tabs = ["resumen","flujo","amortizacion","sensibilidad","comparacion"];
+  const nombres = {resumen:"Resumen", flujo:"Flujo de caja", amortizacion:"Cuota y equilibrio", sensibilidad:"Sensibilidad", comparacion:"Comparar propiedades"};
+
+  let html = `<div class="tabs">${tabs.map(t=>`<div class="tab ${t===tabActiva?"on":""}" data-tab="${t}">${nombres[t]}</div>`).join("")}</div>`;
+
+  if(tabActiva==="resumen"){
+    const accesoOk = c.accesoCredito!==null && c.accesoCredito<=escenario.ratio_max_dividendo;
+    html += `<div class="kpi-grid">
+      <div class="kpi"><div class="l">Precio</div><div class="v">${fmtUF(c.prop.precio_uf)}</div></div>
+      <div class="kpi"><div class="l">Pie (${S.credito.pie_pct}%)</div><div class="v">${fmtCLP(c.pieCLP)}</div></div>
+      <div class="kpi"><div class="l">Cuota total mensual</div><div class="v">${fmtCLP(c.cuotaTotal)}</div></div>
+      <div class="kpi"><div class="l">Flujo mes 1</div><div class="v ${c.flujoMesArr[0]>=0?'good':'bad'}">${fmtCLP(c.flujoMesArr[0])}</div></div>
+      <div class="kpi"><div class="l">Equilibrio (flujo acum.)</div><div class="v">${c.mesEquilibrio? "mes "+c.mesEquilibrio : "no en "+S.evaluacion.horizonte_anos+" años"}</div></div>
+      <div class="kpi"><div class="l">VPN a ${c.anioVenta} años (venta)</div><div class="v ${c.vpnConVenta>=0?'good':'bad'}">${fmtCLP(c.vpnConVenta)}</div></div>
+      <div class="kpi"><div class="l">ROI a la venta (año ${c.anioVenta})</div><div class="v ${c.roiVenta>=0?'good':'bad'}">${fmtPct(c.roiVenta*100)}</div></div>
+      <div class="kpi"><div class="l">Cuota / renta ingresada</div><div class="v">${c.accesoCredito!==null?fmtPct(c.accesoCredito):"—"} <span class="pill ${accesoOk?'ok':'no'}">${accesoOk?'accede':'no accede'}</span></div></div>
+    </div>
+    <div class="hint">Renta mínima requerida para este ratio: ${fmtCLP(c.rentaMinimaRequerida)}/mes.</div>
+    ${c.curva ? "" : ""}
+    `;
+    if(PROPIEDADES[seleccionado].precio_uf && S.equipamiento){
+      const algunRango = ["MLC-3521278834"].includes(c.prop.id);
+    }
+  }
+
+  if(tabActiva==="flujo"){
+    html += `<div class="chart-box"><h3>Flujo de caja acumulado (años 0–${S.evaluacion.horizonte_anos})</h3>
+      ${svgLineChart(c.serieMensual.map(p=>({x:p.mes/12,y:p.acumulado})), {xlabel:"años", color: c.mesEquilibrio?"#0f6e57":"#a02b2b"})}
+      <div class="hint">${c.mesEquilibrio? `Cruza cero en el mes ${c.mesEquilibrio} (año ${(c.mesEquilibrio/12).toFixed(1)}).` : "No alcanza a cruzar cero dentro del horizonte definido."}</div>
+    </div>
+    <div class="chart-box"><h3>Ocupación de equilibrio por mes (vs. ocupación supuesta)</h3>
+      ${svgLineChart(c.ocupEquilibrioMes.map((v,i)=>({x:i+1,y:v})), {color:"#a02b2b", xlabel:"mes (1-12)"})}
+      <table style="margin-top:8px">
+        <tr><th>Mes</th>${NOMBRES_MES.map(m=>`<th>${m}</th>`).join("")}</tr>
+        <tr><td>Ocup. equilibrio</td>${c.ocupEquilibrioMes.map(v=>`<td>${isFinite(v)?fmtPct(v):"—"}</td>`).join("")}</tr>
+        <tr><td>Ocup. supuesta</td>${c.curva.ocupacion_pct.map(v=>`<td>${fmtPct(v)}</td>`).join("")}</tr>
+      </table>
+      <div class="hint">Si "ocup. supuesta" está por debajo de "ocup. equilibrio", ese mes da pérdida operativa.</div>
+    </div>
+    <div class="chart-box"><h3>Flujo mensual — año 1</h3>
+      <table><tr><th>Mes</th>${NOMBRES_MES.map(m=>`<th>${m}</th>`).join("")}</tr>
+      <tr><td>Ingreso</td>${c.ingresosMes.map(v=>`<td>${fmtCLP(v)}</td>`).join("")}</tr>
+      <tr><td>Costos op.</td>${c.costosMes.map(v=>`<td>${fmtCLP(v.total)}</td>`).join("")}</tr>
+      <tr><td>Cuota</td>${c.ingresosMes.map(()=>`<td>${fmtCLP(c.cuotaTotal)}</td>`).join("")}</tr>
+      <tr><td><b>Flujo neto</b></td>${c.flujoMesArr.map(v=>`<td><b class="${v>=0?'':''}">${fmtCLP(v)}</b></td>`).join("")}</tr>
+      </table>
+    </div>
+    <div class="chart-box"><h3>Flujo anual (todo el plazo)</h3>
+      ${svgLineChart(c.flujosAnuales.map((v,i)=>({x:i+1,y:v})), {color:"#0f6e57", xlabel:"año", zeroLine:true})}
+    </div>`;
+  }
+
+  if(tabActiva==="amortizacion"){
+    const filas = tablaAmortizacion(c.principalCLP, c.i, c.n, c.cuotaCredito);
+    const porAnio = [];
+    for(let a=0;a<S.credito.plazo_anos;a++){
+      const filasAnio = filas.slice(a*12, a*12+12);
+      porAnio.push({anio:a+1, interes: filasAnio.reduce((x,f)=>x+f.interes,0), amort: filasAnio.reduce((x,f)=>x+f.amort,0)});
+    }
+    html += `<div class="chart-box"><h3>Composición de la cuota (interés vs. amortización, por año)</h3>
+      ${svgStackedBars(porAnio)}
+      <div class="hint">Cuota mensual fija: crédito ${fmtCLP(c.cuotaCredito)} + seguro ${fmtCLP(c.seguro)} = <b>${fmtCLP(c.cuotaTotal)}</b>.</div>
+    </div>`;
+  }
+
+  if(tabActiva==="sensibilidad"){
+    const tasasDelta = [-1,-0.5,0,0.5,1,2];
+    const piesDelta = [-10,-5,0,5,10];
+    const tasas = tasasDelta.map(d=>+(S.credito.tasa_anual_pct+d).toFixed(2));
+    const pies = piesDelta.map(d=>Math.max(0,S.credito.pie_pct+d));
+    const matrix = pies.map(pie=>tasas.map(tasa=>{
+      const principal = c.precioCLP*(1-pie/100);
+      return cuotaFrancesa(principal, tasa, S.credito.plazo_anos, S.credito.seguro_mensual_pct_sobre_principal).cuotaTotal;
+    }));
+    html += `<div class="chart-box"><h3>Sensibilidad de la cuota mensual (CLP) — filas: pie %, columnas: tasa %</h3>
+      ${svgHeatmap(pies.map(p=>p+"%"), tasas.map(t=>t+"%"), matrix, v=>Math.round(v).toLocaleString("es-CL"))}
+      <div class="hint">Base actual resaltada por posición (fila = pie ${S.credito.pie_pct}%, columna = tasa ${S.credito.tasa_anual_pct}%).</div>
+    </div>`;
+  }
+
+  if(tabActiva==="comparacion"){
+    html += `<table><tr><th>Propiedad</th><th>Precio</th><th>Cuota total</th><th>Flujo mes 1</th><th>Equilibrio</th><th>VPN (${escenario.anio_venta}a)</th><th>ROI venta</th></tr>`;
+    calculos.forEach((cc,i)=>{
+      html += `<tr style="${i===seleccionado?'background:#f4f6f9':''}">
+        <td>${cc.prop.id}</td><td>${fmtUF(cc.prop.precio_uf)}</td><td>${fmtCLP(cc.cuotaTotal)}</td>
+        <td class="${cc.flujoMesArr[0]>=0?'':''}" style="color:${cc.flujoMesArr[0]>=0?'#1a7a45':'#a02b2b'}">${fmtCLP(cc.flujoMesArr[0])}</td>
+        <td>${cc.mesEquilibrio?"mes "+cc.mesEquilibrio:"—"}</td>
+        <td style="color:${cc.vpnConVenta>=0?'#1a7a45':'#a02b2b'}">${fmtCLP(cc.vpnConVenta)}</td>
+        <td style="color:${cc.roiVenta>=0?'#1a7a45':'#a02b2b'}">${fmtPct(cc.roiVenta*100)}</td>
+      </tr>`;
+    });
+    html += `</table><div class="hint">Todas recalculadas con los mismos supuestos del panel izquierdo — moveé cualquier supuesto y esta tabla se actualiza sola.</div>`;
+  }
+
+  document.getElementById("content").innerHTML = html;
+  document.querySelectorAll(".tab").forEach(el=>el.onclick=()=>{ tabActiva=el.dataset.tab; renderContent(); });
+}
+
+renderPanel();
+renderContent();
+</script>
+</body>
+</html>

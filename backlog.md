@@ -101,21 +101,40 @@ acá). ✅
 
 ---
 
-## ⬜ 5 · El modelo (evaluador financiero)
+## ✅ 5 · El modelo (evaluador financiero)
 
-Un solo archivo HTML standalone que carga `supuestos.yaml` (con `pie_pct`
-inicial en pantalla de 10%, no el 20% del archivo, editable) y analiza las
-propiedades del top 10. Incluye retorno, punto de equilibrio, sensibilidad
-de cuota (tasa/pie), composición de cuota, UF actualizada desde el SII,
-clasificación de renta, flujo de caja mensual/anual, escenario de
-plusvalía/venta con ROI/VPN, comparación lado a lado, y la prueba de
-dividendo-vs-arriendo con pie 10%. Sin filtro ni corte automático.
+**Estado:** cerrado. Archivo `evaluador/evaluador-financiero.html` — un
+solo archivo, sin dependencias externas, abre con doble clic. Probado sin
+errores en navegador headless (Playwright) y verificado a mano el cálculo
+de la cuota francesa.
+
+Analiza las **6 propiedades marcadas como "Aprobado evaluador"** en Notion
+(las < 6.000 UF, todas 1D1B — ver conversación). Fórmulas aprobadas por la
+usuaria antes de escribir el archivo (cuota francesa, ingresos con curva de
+12 meses, costos operativos, flujo de caja mensual/anual, punto de
+equilibrio por flujo acumulado *y* por ocupación, VPN/ROI con escenario de
+venta y plusvalía, sensibilidad tasa×pie, clasificación de renta). Todos
+los supuestos visibles y editables en pantalla, con `pie_pct` arrancando en
+10% (no el 20% de `supuestos.yaml`). Comparación lado a lado de las 6,
+recalculada al mover cualquier supuesto.
+
+**Hallazgo real del modelo (no es un bug):** con los supuestos por defecto,
+la propiedad más barata no recupera la inversión solo con arriendo dentro
+de 30 años, pero el VPN a 10 años da positivo por la plusvalía de venta —
+el negocio depende de vender, no de que el arriendo pague la inversión
+solo. Vale la pena que la usuaria pruebe supuestos propios (el archivo
+mismo dice que los de `supuestos.yaml` no son de mercado).
+
+**UF del SII:** el botón intenta actualizarla en vivo desde el navegador de
+la usuaria (no desde este entorno); si el sitio bloquea la petición por
+CORS, avisa y deja el valor de `supuestos.yaml` como respaldo editable.
 
 **Gate:** el usuario marca en Notion cuáles del top 10 aprueba para
-visitar (máx. 3).
+visitar (máx. 3) — pendiente, es el siguiente paso de decisión antes de
+abrir el ítem 6.
 
-**Éxito:** todos los indicadores visibles para el top 10, decisión
-100% del usuario registrada en Notion.
+**Éxito:** todos los indicadores visibles para las propiedades aprobadas,
+sin corte automático. ✅
 
 ---
 
