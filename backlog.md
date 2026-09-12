@@ -179,17 +179,26 @@ permiso).
 
 ---
 
-## ⬜ 7 · Supervisar (harness)
+## 🟡 7 · Supervisar (harness)
 
-Revisión punta a punta del código generado. Mínimo 10 propuestas de mejora
-en confiabilidad y eficiencia, clasificadas por impacto. Script de
-validación único que corre todos los chequeos del sistema (verde/rojo, sin
-opinar), incluyendo como mínimo los listados en `CLAUDE.md`. Las mejoras que
-el usuario apruebe se agregan como nuevos ítems de este backlog (por
-ejemplo: programar el pipeline con cron, soporte multi-zona).
+**Estado:** en progreso. Hechos: `supervision.md` con **12 propuestas de
+mejora** clasificadas por impacto (3 alto, 5 medio, 4 bajo), y
+`scripts/validar.py` — el script único de validación, probado con datos
+reales y con un snapshot sintético con errores a propósito (detectó los 3
+correctamente: id faltante, id repetido, precio ≤0).
 
-**Éxito:** script de validación existe y corre; ninguna propuesta aprobada
-queda sin su propio ítem de backlog.
+7 de 9 chequeos son automatizables sin red ni MCP y corren solos; 2
+(Notion vs. snapshot, ningún bloqueo de calendario confirmado) requieren
+datos en vivo que un script standalone no puede traer por sí solo —
+quedan marcados `OMITIDO`, nunca fingidos en verde.
+
+**Falta:** que el usuario revise `supervision.md` y decida cuáles de las
+12 propuestas pasan a ser ítems nuevos del backlog (sección "Ítems
+futuros" más abajo).
+
+**Éxito:** script de validación existe y corre ✅; ninguna propuesta
+aprobada queda sin su propio ítem de backlog ⬜ (pendiente de que el
+usuario apruebe cuáles).
 
 ---
 
