@@ -26,10 +26,17 @@ la fuente de verdad de lo decidido; `CLAUDE.md` trae las reglas de trabajo y
 
 ## Filtros de propiedad (aplican en todo el proceso)
 
-- **Tipologías:** 1D1B, 2D1B, 2D2B. **3D2B queda fuera.**
+- **Tipologías:** 1D1B, 2D2B. **3D2B queda fuera** (decisión original), y
+  **2D1B se cayó del alcance** tras la corrida real del scraper (paso 2):
+  sobre 150 propiedades de la zona, ninguna es 2D1B — no existe oferta de
+  esa tipología ahí, así que no tiene sentido seguir buscándola.
 - **Condición:** solo propiedades **nuevas** (no usadas / segunda mano).
-- **Precio tope:** **8.000 UF** (único número de corte en todo el proceso —
-  el scraper no debe traer nada por encima de este tope).
+- **Precio tope:** **8.000 UF** (único número de corte en todo el proceso).
+  Sobre las 150 propiedades scrapeadas, solo 16 caen dentro de este tope
+  (7 × 1D1B, 7 × 2D2B, y 2 de tipologías ya descartadas) — la URL de zona
+  no trae un filtro de precio, así que el scraper gasta la mayor parte del
+  tope en propiedades fuera de presupuesto. Con 14 propiedades útiles
+  (1D1B + 2D2B) alcanza para seguir al paso 4 (ranking).
 
 ## Cortes y cantidades por paso
 

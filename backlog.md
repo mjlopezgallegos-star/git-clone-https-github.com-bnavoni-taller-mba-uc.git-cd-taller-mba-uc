@@ -71,7 +71,8 @@ comparación fila por fila antes de seguir.
 ## ⬜ 4 · Priorizar (ranking)
 
 Script de Python sobre los datos de Notion: UF/m², mediana, percentil —
-agrupado por tipología (1D1B, 2D1B, 2D2B), sin comparar entre tipologías.
+agrupado por tipología (1D1B, 2D2B — 2D1B se cayó del alcance, ver
+`specs.md`), sin comparar entre tipologías.
 Grupos de menos de 5 propiedades se marcan "grupo chico", sin percentil. Sin
 score compuesto con pesos. Proponer otros análisis posibles; el usuario
 decide cuáles hacer y cuáles quedan para el backlog.
