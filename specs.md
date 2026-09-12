@@ -52,6 +52,20 @@ la fuente de verdad de lo decidido; `CLAUDE.md` trae las reglas de trabajo y
 - Verificado 1 a 1 contra el snapshot filtrado (precio y m²): 14/14 sin
   diferencias.
 
+## Ranking (paso 4)
+
+- Script: `scripts/ranking.py`. Métrica: **UF/m²** = precio_min / m2_util_min,
+  agrupado por tipología, sin comparar 1D1B contra 2D2B, sin score
+  compuesto con pesos.
+- Ambos grupos (1D1B y 2D2B, 7 propiedades cada uno) reportan mediana y
+  percentil — ninguno es "grupo chico" (mínimo 5).
+- 4 propiedades "proyecto" tienen precio único con rango de m²: el UF/m² se
+  calculó emparejando el precio con el **m² mínimo** del rango (lectura más
+  razonable de un "Desde X"), marcadas con `Rango m2 = true` en Notion —
+  no es un dato 100% cierto, es la interpretación más defendible.
+- Columnas nuevas en Notion: `UF por m2`, `Ranking en tipologia`,
+  `Percentil en tipologia`, `Grupo chico`, `Rango m2`.
+
 ## Cortes y cantidades por paso
 
 | Momento | Parámetro | Valor |

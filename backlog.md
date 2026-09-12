@@ -72,21 +72,32 @@ fila por fila (id, precio, m²) — **14/14 coinciden, 0 diferencias.**
 
 ---
 
-## ⬜ 4 · Priorizar (ranking)
+## ✅ 4 · Priorizar (ranking)
 
-Script de Python sobre los datos de Notion: UF/m², mediana, percentil —
-agrupado por tipología (1D1B, 2D2B — 2D1B se cayó del alcance, ver
-`specs.md`), sin comparar entre tipologías.
-Grupos de menos de 5 propiedades se marcan "grupo chico", sin percentil. Sin
-score compuesto con pesos. Proponer otros análisis posibles; el usuario
-decide cuáles hacer y cuáles quedan para el backlog.
+**Estado:** cerrado. Script `scripts/ranking.py` (versionado en el repo),
+corre sobre los datos ya cargados en Notion, calcula UF/m² (precio_min /
+m2_util_min), agrupa por tipología (1D1B, 2D2B — 14 propiedades, 7 y 7) y
+ordena de menor a mayor UF/m² dentro de cada grupo. Ningún grupo es "chico"
+(ambos ≥5), así que se reportó mediana y percentil para los dos.
 
-**Salida:** top 10 de propiedades (≤ 8.000 UF), escrito de vuelta en
-Notion.
+**Nota de datos:** 4 de las 14 propiedades son "proyecto" con precio único
+("Desde X UF") pero rango de m² — el script empareja ese precio con el m²
+mínimo del rango (lectura más razonable de un "Desde", no un hecho
+observado con certeza). Quedan marcadas con `Rango m2 = true` en Notion.
 
-**Gate:** aprobar qué análisis adicionales hacer.
+**Resultado escrito en Notion** (columnas nuevas: `UF por m2`,
+`Ranking en tipologia`, `Percentil en tipologia`, `Grupo chico`,
+`Rango m2`), las 14 filas, sin nulos.
 
-**Éxito:** ranking agrupado y ordenado según lo anterior, sin excepciones.
+**Otros análisis propuestos, pendientes de decisión del usuario** (ver
+conversación): precio por dormitorio (UF/dormitorio), y separar el ranking
+en dos escenarios (m² mínimo vs. m² máximo del rango) para las 4
+propiedades "proyecto", en vez de un solo número. Se agregan como ítems
+futuros solo si el usuario los aprueba.
+
+**Éxito:** ranking agrupado y ordenado, sin comparar tipologías entre sí,
+sin score compuesto con pesos, grupos chicos sin percentil (no aplicó
+acá). ✅
 
 ---
 
