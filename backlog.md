@@ -53,18 +53,22 @@ repetidas ni sin identificador. ✅
 
 ---
 
-## ⬜ 3 · Notion (vault)
+## ✅ 3 · Notion (vault)
 
-Diseñar el esquema de la base en Notion a partir de lo que realmente trae
-el snapshot del ítem 2 (no antes). Definir qué columnas escribe el sistema
-y cuáles el usuario (ej. aprobaciones). Cargar los datos con aprobación
-previa del esquema. Chequeo verificable: Notion vs. snapshot, fila por
-fila, precio y m².
+**Estado:** cerrado. Base creada en el workspace de Notion de la usuaria:
+**"Propiedades — Agente Airbnb Lo Barnechea"**
+(https://app.notion.com/p/237a2210652a467eb84b6194b16914e6).
 
-**Gate:** aprobar el esquema antes de crear la base; confirmar la
-comparación fila por fila antes de seguir.
+Esquema aprobado por la usuaria (ver `specs.md` si se agrega detalle ahí).
+Se cargaron las **14 propiedades** que ya pasaron el filtro de tipología
+(1D1B/2D2B) y precio (≤ 8.000 UF) definido en el ítem 2 — no las 150 del
+snapshot completo, ya que las otras 136 quedan fuera de alcance y no tiene
+sentido llevarlas a Notion.
 
-**Éxito:** cantidad de filas y valores coinciden 1 a 1 con el snapshot.
+**Chequeo verificable hecho:** se comparó Notion contra el snapshot filtrado
+fila por fila (id, precio, m²) — **14/14 coinciden, 0 diferencias.**
+
+**Éxito:** cantidad de filas y valores coinciden 1 a 1 con el snapshot. ✅
 
 ---
 

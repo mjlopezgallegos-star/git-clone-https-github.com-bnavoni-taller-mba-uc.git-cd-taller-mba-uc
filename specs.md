@@ -38,6 +38,20 @@ la fuente de verdad de lo decidido; `CLAUDE.md` trae las reglas de trabajo y
   tope en propiedades fuera de presupuesto. Con 14 propiedades útiles
   (1D1B + 2D2B) alcanza para seguir al paso 4 (ranking).
 
+## Base en Notion (paso 3)
+
+- **Base:** "Propiedades — Agente Airbnb Lo Barnechea" —
+  https://app.notion.com/p/237a2210652a467eb84b6194b16914e6
+- Contiene las **14 propiedades filtradas** (1D1B/2D2B, ≤ 8.000 UF), no las
+  150 del snapshot completo.
+- Columnas del sistema: `ID Portal` (título, id único), `Titulo`, `URL`,
+  `Tipologia`, `Es proyecto`, `Moneda`, `Precio min/max`,
+  `Es rango precio`, `Dormitorios min/max`, `Banos min/max`,
+  `M2 util min/max`, `Agencia` (vacía salvo 1 caso, se completa en paso 6).
+- Columnas del usuario: `Aprobado evaluador`, `Aprobado visita`, `Notas`.
+- Verificado 1 a 1 contra el snapshot filtrado (precio y m²): 14/14 sin
+  diferencias.
+
 ## Cortes y cantidades por paso
 
 | Momento | Parámetro | Valor |
