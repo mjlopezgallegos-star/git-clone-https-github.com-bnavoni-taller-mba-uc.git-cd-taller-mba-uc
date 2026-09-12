@@ -138,9 +138,18 @@ sin corte automático. ✅
 
 ---
 
-## 🟡 6 · Contactar y agendar
+## ✅ 6 · Contactar y agendar
 
-**Estado:** en progreso. Propiedades aprobadas para visita (Notion,
+**Estado:** cerrado por decisión de la usuaria, con 2 de 3 criterios de
+éxito pendientes (no resueltos, solo aceptados como está por ahora): el
+mensaje quedó redactado, pero el borrador real en Gmail y el bloqueo
+tentativo en Calendar **no se llegaron a crear** — los conectores están
+enlazados pero sin el permiso de escritura necesario (Gmail: falta scope
+de borradores; Calendar: solo lectura). Si más adelante se reconectan con
+permiso de edición, retomar desde `contacto/paso6_contactos.md` para
+crear los 2 borradores y los 2 bloqueos sin volver a redactar nada.
+
+Propiedades aprobadas para visita (Notion,
 `Aprobado visita = true`): **Neohaus La Dehesa (MLC-4437057464)** y
 **Parque El Rodeo Encino (MLC-1997643357)** — ambas en Lo Barnechea,
 confirmado por la ficha impresa (no por las 3 originales, que se
